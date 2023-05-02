@@ -5,4 +5,5 @@ services:
     image: ghcr.io/2frogsstudio/domain-manager:latest
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - Bot__Token=${BOT_TOKEN}
     restart: on-failure
