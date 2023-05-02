@@ -11,8 +11,7 @@ public class PullingService : BackgroundService {
     private readonly ILogger<PullingService> _logger;
 
     private readonly ReceiverOptions _receiverOptions = new() {
-        AllowedUpdates = Array.Empty<UpdateType>(),
-        ThrowPendingUpdates = true
+        AllowedUpdates = Array.Empty<UpdateType>()
     };
 
     private readonly IUpdateHandler _updateHandler;
