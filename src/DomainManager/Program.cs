@@ -1,6 +1,7 @@
 using DomainManager.Notifications;
 using DomainManager.Services;
 using MassTransit;
+using Serilog;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 
@@ -22,6 +23,9 @@ var host = Host.CreateDefaultBuilder(args)
             .AddTransient<IUpdateHandler, UpdateHandler>();
         services.AddSingleton<IStaticService, StaticService>();
     })
+    .UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration
+        .ReadFrom.Configuration(hostingContext.Configuration)
+        .Enrich.FromLogContext())
     .Build();
 
 host.Run();

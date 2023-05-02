@@ -1,30 +1,33 @@
 <Project Sdk="Microsoft.NET.Sdk.Worker">
 
-    <PropertyGroup>
-        <ContainerImageName>2frogsstudio/domain-manager</ContainerImageName>
-        <ContainerImageTags>latest</ContainerImageTags>
-        <UserSecretsId>e8ff8a33-26c2-4848-9af5-f59c9791147a</UserSecretsId>
-    </PropertyGroup>
+  <PropertyGroup>
+    <ContainerImageName>2frogsstudio/domain-manager</ContainerImageName>
+    <ContainerImageTags>latest</ContainerImageTags>
+    <UserSecretsId>e8ff8a33-26c2-4848-9af5-f59c9791147a</UserSecretsId>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <ContainerLabel Include="org.opencontainers.image.source" Value="https://github.com/$(ContainerImageName)"/>
-    </ItemGroup>
+  <ItemGroup>
+    <ContainerLabel Include="org.opencontainers.image.source" Value="https://github.com/$(ContainerImageName)" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="MassTransit"/>
-        <PackageReference Include="Microsoft.Extensions.Hosting"/>
-        <PackageReference Include="Microsoft.Extensions.Http"/>
-        <PackageReference Include="Microsoft.NET.Build.Containers"/>
-        <PackageReference Include="Telegram.Bot"/>
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MassTransit" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="Microsoft.NET.Build.Containers" />
+    <PackageReference Include="Serilog.Extensions.Hosting" />
+    <PackageReference Include="Serilog.Settings.Configuration" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+    <PackageReference Include="Telegram.Bot" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <Content Update="appsettings.Development.json">
-            <DependentUpon>appsettings.json</DependentUpon>
-        </Content>
-    </ItemGroup>
+  <ItemGroup>
+    <Content Update="appsettings.Development.json">
+      <DependentUpon>appsettings.json</DependentUpon>
+    </Content>
+  </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\DomainManager.Bussines\DomainManager.Bussines.csproj"/>
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DomainManager.Bussines\DomainManager.Bussines.csproj" />
+  </ItemGroup>
 </Project>
