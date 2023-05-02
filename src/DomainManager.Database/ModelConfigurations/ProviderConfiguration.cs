@@ -10,7 +10,7 @@ public class ProviderConfiguration : IEntityTypeConfiguration<Provider> {
         (
             new Provider {
                 Id = 1,
-                Name = "Digital Ocean"
+                Name = "DigitalOcean"
             },
             new Provider {
                 Id = 2,
