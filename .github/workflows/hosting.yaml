@@ -31,5 +31,6 @@ jobs:
         working-directory: ${{ env.HOSTING_PATH }}
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          SUPABASE_CONNECTION_STRING: $$ {{secrets.SUPABASE_CONNECTION_STRING }}
         run: |
           docker-compose up

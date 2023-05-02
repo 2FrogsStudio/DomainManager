@@ -12,6 +12,10 @@
 
   <ItemGroup>
     <PackageReference Include="MassTransit" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="Microsoft.NET.Build.Containers" />
@@ -29,5 +33,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DomainManager.Bussines\DomainManager.Bussines.csproj" />
+    <ProjectReference Include="..\DomainManager.Database\DomainManager.Database.csproj" />
   </ItemGroup>
 </Project>

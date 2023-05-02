@@ -6,4 +6,5 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - Bot__Token=${BOT_TOKEN}
+      - ConnectionStrings__Supabase=${SUPABASE_CONNECTION_STRING}
     restart: on-failure
