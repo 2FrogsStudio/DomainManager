@@ -1,6 +1,11 @@
 name: Hosting
 
 on:
+  push:
+    paths:
+      - .github/workflows/hosting.yaml
+    branches:
+      - main
   schedule:
     - cron: '0 */4 * * *'
   workflow_run:
