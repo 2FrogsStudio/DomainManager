@@ -22,6 +22,7 @@ var host = Host.CreateDefaultBuilder(args)
         services.AddHostedService<PullingService>()
             .AddTransient<IUpdateHandler, UpdateHandler>();
         services.AddSingleton<IStaticService, StaticService>();
+        services.AddHostedService<BotInit>();
     })
     .UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration
         .ReadFrom.Configuration(hostingContext.Configuration)
