@@ -10,6 +10,7 @@
     <PackageReference Include="Telegram.Bot" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DomainManager.Database\DomainManager.Database.csproj" />
     <ProjectReference Include="..\DomainManager.Utils\DomainManager.Utils.csproj" />
   </ItemGroup>
 </Project>

@@ -6,5 +6,8 @@ public enum Command {
     Unknown,
 
     [Command("/help", Description = "Show this help")]
-    Help
+    Help,
+
+    [Command("/providers", Description = "Get supported providers")]
+    Providers
 }
