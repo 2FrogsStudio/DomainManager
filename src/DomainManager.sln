@@ -2,6 +2,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainManager", "DomainManager\DomainManager.csproj", "{1C7B8656-EDDE-4DC4-BA6A-1FC96504CA62}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainManager.Bussines", "DomainManager.Bussines\DomainManager.Bussines.csproj", "{EE594395-4F49-48C7-818C-5100192D0128}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainManager.Utils", "DomainManager.Utils\DomainManager.Utils.csproj", "{9FD11DB1-BC70-4A59-A79A-2CF3D3E0955C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +16,13 @@ Global
 		{1C7B8656-EDDE-4DC4-BA6A-1FC96504CA62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C7B8656-EDDE-4DC4-BA6A-1FC96504CA62}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C7B8656-EDDE-4DC4-BA6A-1FC96504CA62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE594395-4F49-48C7-818C-5100192D0128}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE594395-4F49-48C7-818C-5100192D0128}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE594395-4F49-48C7-818C-5100192D0128}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE594395-4F49-48C7-818C-5100192D0128}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FD11DB1-BC70-4A59-A79A-2CF3D3E0955C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FD11DB1-BC70-4A59-A79A-2CF3D3E0955C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FD11DB1-BC70-4A59-A79A-2CF3D3E0955C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FD11DB1-BC70-4A59-A79A-2CF3D3E0955C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

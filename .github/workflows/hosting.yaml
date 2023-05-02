@@ -29,5 +29,7 @@ jobs:
 
       - name: Run app
         working-directory: ${{ env.HOSTING_PATH }}
+        env:
+          BOT__TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
           docker-compose up

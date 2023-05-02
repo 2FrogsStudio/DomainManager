@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="MassTransit.Abstractions"/>
+    <PackageReference Include="MassTransit.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions"/>
+    <PackageReference Include="Telegram.Bot"/>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DomainManager.Utils\DomainManager.Utils.csproj"/>
+  </ItemGroup>
+</Project>

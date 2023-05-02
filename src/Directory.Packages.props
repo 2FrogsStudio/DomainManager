@@ -3,7 +3,14 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
-    <PackageVersion Include="Microsoft.NET.Build.Containers" Version="0.4.0" />
+    <PackageVersion Include="MassTransit" Version="8.0.15"/>
+    <PackageVersion Include="MassTransit.Abstractions" Version="8.0.15"/>
+    <PackageVersion Include="MassTransit.Analyzers" Version="8.0.15"/>
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="7.0.1"/>
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0"/>
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="7.0.0"/>
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0"/>
+    <PackageVersion Include="Microsoft.NET.Build.Containers" Version="0.4.0"/>
+    <PackageVersion Include="Telegram.Bot" Version="18.0.0"/>
   </ItemGroup>
 </Project>
