@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -7,12 +6,12 @@ using Whois;
 
 namespace DomainManager.Notifications.CommandHandlers;
 
-public partial class WhoisCommandHandler : CommandHandlerBase {
+public class ExpirationCommandHandler : CommandHandlerBase {
     private readonly ITelegramBotClient _botClient;
     private readonly IWhoisLookup _whoisLookup;
 
-    public WhoisCommandHandler(ITelegramBotClient botClient, IWhoisLookup whoisLookup) :
-        base(Command.Whois) {
+    public ExpirationCommandHandler(ITelegramBotClient botClient, IWhoisLookup whoisLookup) :
+        base(Command.Expiration) {
         _botClient = botClient;
         _whoisLookup = whoisLookup;
     }
@@ -42,7 +41,7 @@ public partial class WhoisCommandHandler : CommandHandlerBase {
 
         await _botClient.SendTextMessageAsync(
             message.Chat.Id,
-            $"```{(response.ContentLength >= 4000 ? response.Content[..4000] + "..." : response.Content)}```",
+            $"Expiration date: `{response.Expiration:d}`",
             ParseMode.Markdown,
             replyToMessageId: message.MessageId,
             replyMarkup: new ReplyKeyboardRemove(),
@@ -52,14 +51,16 @@ public partial class WhoisCommandHandler : CommandHandlerBase {
 
 
     private static bool TryGetDomainFromInput(string input, out string domain) {
-        if (!input.Contains(Uri.SchemeDelimiter)) {
-            input = string.Concat(Uri.UriSchemeHttp, Uri.SchemeDelimiter, input);
-        }
-
-        domain = new Uri(input).Host;
+        domain = input;
         return true;
+        // if (!input.Contains(Uri.SchemeDelimiter)) {
+        //     input = string.Concat(Uri.UriSchemeHttp, Uri.SchemeDelimiter, input);
+        // }
+        //
+        // domain = new Uri(input).Host;
+        // return true;
     }
 
-    [GeneratedRegex("/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\\.[a-zA-Z]{2,}$/", RegexOptions.Compiled)]
-    private static partial Regex DomainRegex();
+    // [GeneratedRegex("/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\\.[a-zA-Z]{2,}$/", RegexOptions.Compiled)]
+    // private static partial Regex DomainRegex();
 }
