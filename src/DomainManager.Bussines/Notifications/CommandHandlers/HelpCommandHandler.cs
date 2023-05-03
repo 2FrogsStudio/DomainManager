@@ -12,7 +12,7 @@ public class HelpCommandHandler : CommandHandlerBase {
         _botClient = botClient;
     }
 
-    protected override async Task Consume(string[]? args, Message message, CancellationToken cancellationToken) {
+    protected override async Task Consume(string[] args, Message message, CancellationToken cancellationToken) {
         var sb = new StringBuilder("Usage:\n");
         foreach (var (_, commandDescription) in
                  CommandHelpers.CommandAttributeByCommand.Where(c => c.Value is not null))

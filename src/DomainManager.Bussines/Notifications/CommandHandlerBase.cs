@@ -16,5 +16,5 @@ public abstract class CommandHandlerBase : IConsumer<CommandNotification> {
         }
     }
 
-    protected abstract Task Consume(string[]? args, Message message, CancellationToken cancellationToken);
+    protected abstract Task Consume(string[] args, Message message, CancellationToken cancellationToken);
 }

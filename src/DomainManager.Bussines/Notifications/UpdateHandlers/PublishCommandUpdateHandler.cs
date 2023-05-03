@@ -1,21 +1,25 @@
 ﻿using DomainManager.Services;
 using MassTransit;
 using MassTransit.Mediator;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Telegram.Bot.Types.Enums;
 
 namespace DomainManager.Notifications.UpdateHandlers;
 
 public class PublishCommandUpdateHandler : IConsumer<UpdateNotification> {
+    private readonly IHostEnvironment _hostEnvironment;
     private readonly ILogger<PublishCommandUpdateHandler> _logger;
     private readonly IScopedMediator _mediator;
     private readonly IStaticService _staticService;
 
 
     public PublishCommandUpdateHandler(IScopedMediator mediator, IStaticService staticService,
-        ILogger<PublishCommandUpdateHandler> logger) {
+        ILogger<PublishCommandUpdateHandler> logger, IHostEnvironment hostEnvironment) {
         _mediator = mediator;
         _staticService = staticService;
         _logger = logger;
+        _hostEnvironment = hostEnvironment;
     }
 
     public async Task Consume(ConsumeContext<UpdateNotification> context) {
@@ -29,20 +33,26 @@ public class PublishCommandUpdateHandler : IConsumer<UpdateNotification> {
 
         var commandAndArgs = messageText.Split(' ');
         var commandAndUserName = commandAndArgs[0].Split('@', 2);
-        if (commandAndUserName.Length == 2) {
-            var botUsername = await _staticService.GetBotUsername(cancellationToken);
-            if (commandAndUserName[1] != botUsername) {
-                _logger.LogDebug(
-                    "Command ignored die to wrong bot username Expected: {ExpectedUserName} Actual: {ActualUserName}",
-                    botUsername, commandAndUserName[1]);
+        switch (commandAndUserName.Length) {
+            case 1 when update.Message.Chat.Type is not ChatType.Private && _hostEnvironment.IsDevelopment():
                 return;
+            case 2: {
+                var botUsername = await _staticService.GetBotUsername(cancellationToken);
+                if (commandAndUserName[1] != botUsername) {
+                    _logger.LogDebug(
+                        "Command ignored die to wrong bot username Expected: {ExpectedUserName} Actual: {ActualUserName}",
+                        botUsername, commandAndUserName[1]);
+                    return;
+                }
+
+                break;
             }
         }
 
         var command = CommandHelpers.CommandByText.TryGetValue(commandAndUserName[0], out var cmd)
             ? cmd
             : Command.Unknown;
-        var args = commandAndArgs.Length >= 2 ? commandAndArgs[1..] : null;
+        var args = commandAndArgs.Length >= 2 ? commandAndArgs[1..] : Array.Empty<string>();
 
         await _mediator.Publish<CommandNotification>(new {
             Command = command,

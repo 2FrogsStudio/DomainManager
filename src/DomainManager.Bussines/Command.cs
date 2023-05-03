@@ -9,5 +9,8 @@ public enum Command {
     Help,
 
     [Command("/providers", Description = "Get supported providers")]
-    Providers
+    Providers,
+
+    [Command("/whois", Description = "Get supported providers `/whois domain`")]
+    Whois
 }

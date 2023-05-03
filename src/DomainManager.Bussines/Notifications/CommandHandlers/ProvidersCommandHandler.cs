@@ -14,7 +14,7 @@ public class ProvidersCommandHandler : CommandHandlerBase {
         _db = db;
     }
 
-    protected override async Task Consume(string[]? args, Message message, CancellationToken cancellationToken) {
+    protected override async Task Consume(string[] args, Message message, CancellationToken cancellationToken) {
         var sb = new StringBuilder()
             .AppendLine("Supported provider list:");
         await foreach (var provider in _db.Providers) sb.AppendLine(provider.Name);

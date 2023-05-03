@@ -31,6 +31,7 @@ builder.Services.AddHostedService<PullingService>()
     .AddTransient<IUpdateHandler, UpdateHandler>();
 builder.Services.AddSingleton<IStaticService, StaticService>();
 builder.Services.AddHostedService<BotInit>();
+builder.Services.AddWhoisService();
 builder.AddApplicationDbContext();
 
 var host = builder.Build();
