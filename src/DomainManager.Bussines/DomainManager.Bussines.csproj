@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <PackageReference Include="MassTransit" />
     <PackageReference Include="MassTransit.Abstractions" />
     <PackageReference Include="MassTransit.Analyzers">
       <PrivateAssets>all</PrivateAssets>

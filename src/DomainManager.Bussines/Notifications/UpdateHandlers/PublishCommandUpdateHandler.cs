@@ -3,11 +3,14 @@ using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace DomainManager.Notifications.UpdateHandlers;
 
 public class PublishCommandUpdateHandler : IConsumer<UpdateNotification> {
+    private readonly ITelegramBotClient _botClient;
     private readonly IHostEnvironment _hostEnvironment;
     private readonly ILogger<PublishCommandUpdateHandler> _logger;
     private readonly IScopedMediator _mediator;
@@ -15,19 +18,25 @@ public class PublishCommandUpdateHandler : IConsumer<UpdateNotification> {
 
 
     public PublishCommandUpdateHandler(IScopedMediator mediator, IStaticService staticService,
-        ILogger<PublishCommandUpdateHandler> logger, IHostEnvironment hostEnvironment) {
+        ILogger<PublishCommandUpdateHandler> logger, IHostEnvironment hostEnvironment, ITelegramBotClient botClient) {
         _mediator = mediator;
         _staticService = staticService;
         _logger = logger;
         _hostEnvironment = hostEnvironment;
+        _botClient = botClient;
     }
 
     public async Task Consume(ConsumeContext<UpdateNotification> context) {
         var update = context.Message.Update;
         var cancellationToken = context.CancellationToken;
 
-        if (update is not { Message.Text: { } messageText } ||
-            !messageText.StartsWith('/')) {
+        if (update is not {
+                Message : {
+                    Text: { } messageText,
+                    MessageId: var messageId,
+                    Chat.Id: var chatId
+                }
+            } || !messageText.StartsWith('/')) {
             return;
         }
 
@@ -54,7 +63,21 @@ public class PublishCommandUpdateHandler : IConsumer<UpdateNotification> {
             : Command.Unknown;
         var args = commandAndArgs.Length >= 2 ? commandAndArgs[1..] : Array.Empty<string>();
 
-        await _mediator.Publish<CommandNotification>(new {
+        if (args.Length == 1 && args[0].Equals("help", StringComparison.OrdinalIgnoreCase)) {
+            var help = CommandHelpers.CommandAttributeByCommand[command]?.Help;
+            if (help is not null) {
+                await _botClient.SendTextMessageAsync(
+                    chatId,
+                    help,
+                    ParseMode.Markdown,
+                    replyToMessageId: messageId,
+                    replyMarkup: new ReplyKeyboardRemove(),
+                    cancellationToken: context.CancellationToken);
+                return;
+            }
+        }
+
+        await _mediator.Send<CommandNotification>(new {
             Command = command,
             Arguments = args,
             update.Message

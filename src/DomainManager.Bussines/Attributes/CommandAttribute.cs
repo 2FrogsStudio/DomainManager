@@ -7,5 +7,7 @@ public class CommandAttribute : Attribute {
     }
 
     public string Text { get; }
-    public string? Description { get; set; }
+    public string? Description { get; init; }
+
+    public string? Help { get; init; }
 }
