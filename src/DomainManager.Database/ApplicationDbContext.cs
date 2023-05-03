@@ -6,14 +6,17 @@ namespace DomainManager;
 
 public class ApplicationDbContext : DbContext {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
-    public DbSet<Provider> Providers { get; set; } = null!;
-    public DbSet<DomainExpire> DomainExpire { get; set; } = null!;
-    public DbSet<SslExpire> SslExpires { get; set; } = null!;
+    public DbSet<DomainMonitor> DnsMonitor { get; set; } = null!;
+    public DbSet<SslMonitor> SslMonitor { get; set; } = null!;
+
+    public DbSet<DomainMonitorByChat> DomainMonitorByChat { get; set; } = null!;
+    public DbSet<SslMonitorByChat> SslMonitorByChat { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
-        modelBuilder.ApplyConfiguration(new ProviderConfiguration());
-        modelBuilder.ApplyConfiguration(new UserTokensConfiguration());
-        modelBuilder.ApplyConfiguration(new DomainExpireConfiguration());
-        modelBuilder.ApplyConfiguration(new SslExpireConfiguration());
+        modelBuilder.HasCollation("case_insensitive", "en-u-ks-primary", "icu", false);
+        modelBuilder.ApplyConfiguration(new DomainMonitorConfiguration());
+        modelBuilder.ApplyConfiguration(new SslMonitorConfiguration());
+        modelBuilder.ApplyConfiguration(new DomainMonitorByChatConfiguration());
+        modelBuilder.ApplyConfiguration(new SslMonitorByChatConfiguration());
     }
 }

@@ -3,6 +3,7 @@ using System;
 using DomainManager;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DomainManager.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230503133732_FixDomainCollation")]
+    partial class FixDomainCollation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -23,7 +26,24 @@ namespace DomainManager.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("DomainManager.Models.DomainMonitor", b =>
+            modelBuilder.Entity("DomainManager.Models.DomainExpire", b =>
+                {
+                    b.Property<long>("ChatId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Domain")
+                        .HasColumnType("text")
+                        .UseCollation("case_insensitive");
+
+                    b.Property<DateTime?>("LastUpdate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("ChatId", "Domain");
+
+                    b.ToTable("DomainExpire");
+                });
+
+            modelBuilder.Entity("DomainManager.Models.Provider", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -31,35 +51,27 @@ namespace DomainManager.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Domain")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .UseCollation("case_insensitive");
-
-                    b.Property<DateTime?>("LastUpdate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.ToTable("DnsMonitor");
+                    b.ToTable("Providers");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "DigitalOcean"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Gandy"
+                        });
                 });
 
-            modelBuilder.Entity("DomainManager.Models.DomainMonitorByChat", b =>
-                {
-                    b.Property<long>("ChatId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("DomainMonitorId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ChatId", "DomainMonitorId");
-
-                    b.HasIndex("DomainMonitorId");
-
-                    b.ToTable("DomainMonitorByChat");
-                });
-
-            modelBuilder.Entity("DomainManager.Models.SslMonitor", b =>
+            modelBuilder.Entity("DomainManager.Models.SslExpire", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -90,54 +102,42 @@ namespace DomainManager.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SslMonitor");
+                    b.ToTable("SslExpires");
                 });
 
-            modelBuilder.Entity("DomainManager.Models.SslMonitorByChat", b =>
+            modelBuilder.Entity("DomainManager.Models.UserTokens", b =>
                 {
-                    b.Property<long>("ChatId")
+                    b.Property<long>("Id")
                         .HasColumnType("bigint");
 
-                    b.Property<int>("SslMonitorId")
+                    b.Property<int>("ProviderId")
                         .HasColumnType("integer");
 
-                    b.HasKey("ChatId", "SslMonitorId");
+                    b.Property<string>("Secret")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.HasIndex("SslMonitorId");
+                    b.HasKey("Id", "ProviderId");
 
-                    b.ToTable("SslMonitorByChat");
+                    b.HasIndex("ProviderId");
+
+                    b.ToTable("UserTokens");
                 });
 
-            modelBuilder.Entity("DomainManager.Models.DomainMonitorByChat", b =>
+            modelBuilder.Entity("DomainManager.Models.UserTokens", b =>
                 {
-                    b.HasOne("DomainManager.Models.DomainMonitor", "DomainMonitor")
-                        .WithMany("DomainMonitors")
-                        .HasForeignKey("DomainMonitorId")
+                    b.HasOne("DomainManager.Models.Provider", "Provider")
+                        .WithMany("UserTokens")
+                        .HasForeignKey("ProviderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("DomainMonitor");
+                    b.Navigation("Provider");
                 });
 
-            modelBuilder.Entity("DomainManager.Models.SslMonitorByChat", b =>
+            modelBuilder.Entity("DomainManager.Models.Provider", b =>
                 {
-                    b.HasOne("DomainManager.Models.SslMonitor", "SslMonitor")
-                        .WithMany("SslMonitors")
-                        .HasForeignKey("SslMonitorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SslMonitor");
-                });
-
-            modelBuilder.Entity("DomainManager.Models.DomainMonitor", b =>
-                {
-                    b.Navigation("DomainMonitors");
-                });
-
-            modelBuilder.Entity("DomainManager.Models.SslMonitor", b =>
-                {
-                    b.Navigation("SslMonitors");
+                    b.Navigation("UserTokens");
                 });
 #pragma warning restore 612, 618
         }

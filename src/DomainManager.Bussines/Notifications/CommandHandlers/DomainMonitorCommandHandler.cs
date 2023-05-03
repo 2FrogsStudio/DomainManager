@@ -6,12 +6,12 @@ using Whois;
 
 namespace DomainManager.Notifications.CommandHandlers;
 
-public class CheckDomainExpCommandHandler : CommandHandlerBase {
+public class DomainMonitorCommandHandler : CommandHandlerBase {
     private readonly ITelegramBotClient _botClient;
     private readonly IWhoisLookup _whoisLookup;
 
-    public CheckDomainExpCommandHandler(ITelegramBotClient botClient, IWhoisLookup whoisLookup) :
-        base(Command.DomainExpire) {
+    public DomainMonitorCommandHandler(ITelegramBotClient botClient, IWhoisLookup whoisLookup) :
+        base(Command.DomainMonitor) {
         _botClient = botClient;
         _whoisLookup = whoisLookup;
     }
