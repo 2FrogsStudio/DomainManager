@@ -10,17 +10,21 @@ public enum Command {
 
     [Command("/domain_monitor",
         Description = "Monitor domain status",
-        Help = "`/domain_monitor` - get list of your domains to monitor\n" +
-               "`/domain_monitor help` - get this help\n" +
-               "`/domain_monitor [domain]` - add domain to monitoring\n" +
-               "`/domain_monitor [domain] remove` - delete domain from monitoring")]
+        Help = "```\n" +
+               "/domain_monitor                   - get list of your domains to monitor\n" +
+               "/domain_monitor help              - show this help\n" +
+               "/domain_monitor domain.com        - add domain to monitoring\n" +
+               "/domain_monitor domain.com remove - delete domain from monitoring\n" +
+               "```")]
     DomainMonitor,
 
     [Command("/ssl_monitor",
         Description = "Monitor SSL certificate",
-        Help = "`/ssl_monitor` - get list of your hosts to monitor\n" +
-               "`/ssl_monitor help` - get this help\n" +
-               "`/ssl_monitor [host]` - add host to monitoring\n" +
-               "`/ssl_monitor [host] remove` - delete host from monitoring")]
+        Help = "```\n" +
+               "/ssl_monitor                     - get list of your hosts to monitor\n" +
+               "/ssl_monitor help                - show this help\n" +
+               "/ssl_monitor my.site.com         - add host to monitoring\n" +
+               "/ssl_monitor my.site.com remove  - delete host from monitoring\n" +
+               "```")]
     SslMonitor
 }
