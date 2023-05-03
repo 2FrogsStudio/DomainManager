@@ -1,3 +1,5 @@
 namespace DomainManager.Requests;
 
-public record GetCertificateInfo(string Hostname);
+public record GetCertificateInfo {
+    public string Hostname { get; init; }
+}
