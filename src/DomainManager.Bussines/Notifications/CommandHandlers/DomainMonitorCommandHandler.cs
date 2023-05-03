@@ -1,12 +1,12 @@
 using System.Text;
 using DomainManager.Models;
 using DomainManager.Requests;
+using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.EntityFrameworkCore;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Whois;
 
 namespace DomainManager.Notifications.CommandHandlers;
 
@@ -14,13 +14,11 @@ public class DomainMonitorCommandHandler : CommandHandlerBase {
     private readonly ITelegramBotClient _botClient;
     private readonly ApplicationDbContext _db;
     private readonly IScopedMediator _mediator;
-    private readonly IWhoisLookup _whoisLookup;
 
-    public DomainMonitorCommandHandler(ITelegramBotClient botClient, IWhoisLookup whoisLookup, ApplicationDbContext db,
+    public DomainMonitorCommandHandler(ITelegramBotClient botClient, ApplicationDbContext db,
         IScopedMediator mediator) :
         base(Command.DomainMonitor) {
         _botClient = botClient;
-        _whoisLookup = whoisLookup;
         _db = db;
         _mediator = mediator;
     }
@@ -63,11 +61,27 @@ public class DomainMonitorCommandHandler : CommandHandlerBase {
         }
 
         var response = await _mediator.CreateRequestClient<UpdateDomainMonitor>()
-            .GetResponse<DomainMonitor>(new {
+            .GetResponse<DomainMonitor, ErrorResponse>(new {
                 Domain = domain,
                 ChatId = message.Chat.Id
             }, cancellationToken);
-        var domainMonitor = response.Message;
+
+        if (response.Is(out Response<ErrorResponse>? error)) {
+            await _botClient.SendTextMessageAsync(
+                message.Chat.Id,
+                error.Message.Message,
+                ParseMode.Markdown,
+                replyToMessageId: message.MessageId,
+                cancellationToken: cancellationToken
+            );
+            return;
+        }
+
+        if (!response.Is(out Response<DomainMonitor>? successResponse)) {
+            throw new InvalidOperationException();
+        }
+
+        var domainMonitor = successResponse.Message;
 
         var text = new StringBuilder()
             .AppendLine($"Domain `{domain}` has been added to monitoring")

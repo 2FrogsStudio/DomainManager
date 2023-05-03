@@ -1,6 +1,7 @@
 using System.Text;
 using DomainManager.Models;
 using DomainManager.Requests;
+using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.EntityFrameworkCore;
 using Telegram.Bot;
@@ -59,9 +60,24 @@ public class SslMonitorCommandHandler : CommandHandlerBase {
         }
 
         var response = await _mediator.CreateRequestClient<UpdateSslMonitor>()
-            .GetResponse<SslMonitor>(new { ChatId = message.Chat.Id, Domain = domain }, cancellationToken);
-        var sslMonitor = response.Message;
+            .GetResponse<SslMonitor, ErrorResponse>(new { ChatId = message.Chat.Id, Domain = domain },
+                cancellationToken);
+        if (response.Is(out Response<ErrorResponse>? error)) {
+            await _botClient.SendTextMessageAsync(
+                message.Chat.Id,
+                error.Message.Message,
+                ParseMode.Markdown,
+                replyToMessageId: message.MessageId,
+                cancellationToken: cancellationToken
+            );
+            return;
+        }
 
+        if (!response.Is(out Response<SslMonitor>? sslMonitorResponse)) {
+            throw new InvalidOperationException();
+        }
+
+        var sslMonitor = sslMonitorResponse.Message;
         var text = new StringBuilder()
             .AppendLine($"Domain `{domain}` has been added to monitoring")
             .AppendLine()

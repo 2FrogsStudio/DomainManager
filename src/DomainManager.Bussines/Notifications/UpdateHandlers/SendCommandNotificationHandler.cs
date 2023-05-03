@@ -9,16 +9,16 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace DomainManager.Notifications.UpdateHandlers;
 
-public class PublishCommandUpdateHandler : IConsumer<UpdateNotification> {
+public class SendCommandNotificationHandler : IConsumer<UpdateNotification> {
     private readonly ITelegramBotClient _botClient;
     private readonly IHostEnvironment _hostEnvironment;
-    private readonly ILogger<PublishCommandUpdateHandler> _logger;
+    private readonly ILogger<SendCommandNotificationHandler> _logger;
     private readonly IScopedMediator _mediator;
     private readonly IStaticService _staticService;
 
-
-    public PublishCommandUpdateHandler(IScopedMediator mediator, IStaticService staticService,
-        ILogger<PublishCommandUpdateHandler> logger, IHostEnvironment hostEnvironment, ITelegramBotClient botClient) {
+    public SendCommandNotificationHandler(IScopedMediator mediator, IStaticService staticService,
+        ILogger<SendCommandNotificationHandler> logger, IHostEnvironment hostEnvironment,
+        ITelegramBotClient botClient) {
         _mediator = mediator;
         _staticService = staticService;
         _logger = logger;

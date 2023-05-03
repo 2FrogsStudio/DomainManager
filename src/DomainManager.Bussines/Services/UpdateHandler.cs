@@ -24,7 +24,11 @@ public class UpdateHandler : IUpdateHandler {
 
         await using var scope = _serviceProvider.CreateAsyncScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IScopedMediator>();
-        await mediator.Send<UpdateNotification>(new { Update = update }, cancellationToken);
+        try {
+            await mediator.Send<UpdateNotification>(new { Update = update }, cancellationToken);
+        } catch (Exception ex) {
+            _logger.LogError(ex, "UpdateNotification failed: {@Update}", update);
+        }
     }
 
     public async Task HandlePollingErrorAsync(ITelegramBotClient _, Exception exception,

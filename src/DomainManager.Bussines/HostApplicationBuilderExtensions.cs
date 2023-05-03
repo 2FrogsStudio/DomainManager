@@ -1,5 +1,4 @@
 using DomainManager.Notifications;
-using DomainManager.Notifications.CommandHandlers;
 using DomainManager.Services;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
@@ -24,12 +23,7 @@ public static class HostApplicationBuilderExtensions {
                 return new TelegramBotClient(botToken, client);
             });
         builder.Services.AddMassTransit(configurator => configurator.UsingInMemory())
-            .AddMediator(cfg => {
-                cfg.AddConsumers(typeof(UpdateNotification).Assembly);
-                cfg.ConfigureMediator((context, mcfg) => {
-                    mcfg.UseSendFilter(typeof(AnyCommandHelpFilter<>), context);
-                });
-            });
+            .AddMediator(cfg => { cfg.AddConsumers(typeof(UpdateNotification).Assembly); });
         builder.Services.AddHostedService<PullingService>()
             .AddTransient<IUpdateHandler, UpdateHandler>();
         builder.Services.AddSingleton<IStaticService, StaticService>();

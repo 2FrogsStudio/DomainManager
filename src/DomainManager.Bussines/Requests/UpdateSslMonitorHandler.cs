@@ -28,10 +28,17 @@ public class UpdateSslMonitorHandler : IConsumer<UpdateSslMonitor> {
         if (entity.LastUpdateDate is null || DateTime.UtcNow - entity.LastUpdateDate >= _updateNoMoreThan) {
             var response = await _mediator
                 .CreateRequestClient<GetCertificateInfo>()
-                .GetResponse<CertificateInfo>(new { Hostname = domain }, cancellationToken);
+                .GetResponse<CertificateInfo, ErrorResponse>(new { Hostname = domain }, cancellationToken);
+            if (response.Is(out Response<ErrorResponse>? error)) {
+                await context.RespondAsync(error.Message);
+                return;
+            }
 
-            var certInfo = response.Message;
+            if (!response.Is(out Response<CertificateInfo>? certInfoResponse)) {
+                throw new InvalidOperationException();
+            }
 
+            var certInfo = certInfoResponse.Message;
             entity.LastUpdateDate = DateTime.UtcNow;
             entity.Issuer = certInfo.Issuer;
             entity.NotAfter = certInfo.NotAfter.ToUniversalTime();

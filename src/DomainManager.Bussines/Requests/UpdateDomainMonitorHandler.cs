@@ -27,7 +27,13 @@ public class UpdateDomainMonitorHandler : IConsumer<UpdateDomainMonitor> {
                      ?? new DomainMonitor { Domain = domain };
 
         if (entity.LastUpdateDate is null || DateTime.UtcNow - entity.LastUpdateDate >= _updateNoMoreThan) {
-            var domainInfo = await _whoisLookup.LookupAsync(domain);
+            WhoisResponse domainInfo;
+            try {
+                domainInfo = await _whoisLookup.LookupAsync(domain);
+            } catch (Exception e) {
+                await context.RespondAsync<ErrorResponse>(new { e.Message });
+                return;
+            }
 
             entity.LastUpdateDate = DateTime.UtcNow;
             entity.ExpirationDate = domainInfo.Expiration?.ToUniversalTime();
