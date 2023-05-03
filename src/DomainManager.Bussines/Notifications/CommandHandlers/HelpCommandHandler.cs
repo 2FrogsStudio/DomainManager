@@ -1,6 +1,7 @@
 using System.Text;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace DomainManager.Notifications.CommandHandlers;
@@ -22,6 +23,7 @@ public class HelpCommandHandler : CommandHandlerBase {
         await _botClient.SendTextMessageAsync(
             message.Chat.Id,
             text,
+            ParseMode.Markdown,
             replyMarkup: new ReplyKeyboardRemove(),
             cancellationToken: cancellationToken);
     }

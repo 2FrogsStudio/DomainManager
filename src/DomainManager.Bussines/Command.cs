@@ -11,6 +11,6 @@ public enum Command {
     [Command("/providers", Description = "Get supported providers")]
     Providers,
 
-    [Command("/whois", Description = "Get supported providers `/whois domain`")]
+    [Command("/whois", Description = "Get supported providers e.g.`/whois google.com`")]
     Whois
 }
