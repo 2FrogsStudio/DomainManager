@@ -1,4 +1,3 @@
-using System.Text;
 using DomainManager.Models;
 using DomainManager.Requests;
 using MassTransit;
@@ -30,19 +29,19 @@ public class SslMonitorCommandHandler : CommandHandlerBase {
             return await GetHostList(message, cancellationToken);
         }
 
-        if (!args[0].TryGetDomainFromInput(out var domain)) {
-            return "Domain format is not valid. Should be like google.com";
+        if (!args[0].TryGetDomainFromInput(out var host)) {
+            return "Host format is not valid. Should be like google.com";
         }
 
         var response = await _mediator.CreateRequestClient<UpdateSslMonitor>()
             .GetResponse<SslMonitor, MessageResponse>(new {
                     ChatId = message.Chat.Id,
-                    Domain = domain,
+                    Host = host,
                     Delete = args is [_, "remove", ..]
                 },
                 cancellationToken);
         if (response.Is(out Response<MessageResponse>? error)) {
-            return $"Error:{error.Message.Message}";
+            return error.Message.Message;
         }
 
         if (!response.Is(out Response<SslMonitor>? sslMonitorResponse)) {
@@ -50,32 +49,29 @@ public class SslMonitorCommandHandler : CommandHandlerBase {
         }
 
         var sslMonitor = sslMonitorResponse!.Message;
-        return new StringBuilder()
-            .AppendLine($"Domain `{domain}` has been added to monitoring")
-            .AppendLine()
-            .AppendLine("```")
-            .AppendLine($"{"Issued On:",-12} {sslMonitor.NotBefore}")
-            .AppendLine($"{"Expires On:",-12} {sslMonitor.NotAfter}")
-            .AppendLine($"{"Last update:",-12} {sslMonitor.LastUpdateDate}")
-            .AppendLine($"{"Errors:",-12} {sslMonitor.Errors}")
-            .AppendLine("```")
-            .ToString();
+        return $"Host `{host}` has been added to monitoring\n" +
+               $"\n" +
+               $"```\n" +
+               $"Expired on:  {sslMonitor.NotBefore}\n" +
+               $"Last update: {sslMonitor.LastUpdateDate}\n" +
+               $"```";
     }
 
     private async Task<string> GetHostList(Message message, CancellationToken cancellationToken) {
         var monitors = await _db.SslMonitorByChat
             .Where(m => m.ChatId == message.Chat.Id)
             .Select(m => m.SslMonitor)
-            .Select(d => $"{d.Domain,-30} {d.NotAfter,17:g} {d.LastUpdateDate,17:g}")
+            .Select(d => $"{d.Host,-30} {d.NotAfter,17:g} {d.LastUpdateDate,17:g}")
             .ToListAsync(cancellationToken);
 
-        return monitors.Count == 0
-            ? "Add your first domain by `/ssl_monitor [domain]`"
-            : new StringBuilder()
-                .AppendLine("```")
-                .AppendLine($"{"  Domain",-30} {"Expired on   ",17} {"Last update   ",17}")
-                .AppendLine(string.Join('\n', monitors))
-                .AppendLine("```")
-                .ToString();
+        return monitors.Count switch {
+            0 => "Add your first host by `/ssl_monitor my.site.com`\n" +
+                 "Or `/ssl_monitor help` to get command help",
+
+            _ => "```\n" +
+                 $"{"  Host",-30} {"Expired on   ",17} {"Last update   ",17}\n" +
+                 string.Join('\n', monitors) + "\n" +
+                 "```"
+        };
     }
 }

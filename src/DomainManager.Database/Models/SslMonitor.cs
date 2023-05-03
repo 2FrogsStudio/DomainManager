@@ -4,7 +4,7 @@ namespace DomainManager.Models;
 
 public class SslMonitor {
     public int Id { get; set; }
-    public string Domain { get; set; }
+    public string Host { get; set; } = null!;
     public DateTime? LastUpdateDate { get; set; }
     public string? Issuer { get; set; }
     public DateTime NotAfter { get; set; }

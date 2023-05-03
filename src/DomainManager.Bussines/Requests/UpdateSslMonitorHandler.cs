@@ -17,11 +17,11 @@ public class UpdateSslMonitorHandler : IConsumer<UpdateSslMonitor> {
 
     public async Task Consume(ConsumeContext<UpdateSslMonitor> context) {
         var cancellationToken = context.CancellationToken;
-        var domain = context.Message.Domain;
+        var host = context.Message.Host;
         var chatId = context.Message.ChatId;
 
         var entity = await _db.SslMonitor.FirstOrDefaultAsync(
-            d => d.Domain == domain,
+            d => d.Host == host,
             cancellationToken);
 
         if (context.Message.Delete) {
@@ -29,12 +29,12 @@ public class UpdateSslMonitorHandler : IConsumer<UpdateSslMonitor> {
             return;
         }
 
-        entity ??= new SslMonitor { Domain = domain };
+        entity ??= new SslMonitor { Host = host };
 
         if (entity.LastUpdateDate is null || DateTime.UtcNow - entity.LastUpdateDate >= _updateNoMoreThan) {
             var response = await _mediator
                 .CreateRequestClient<GetCertificateInfo>()
-                .GetResponse<CertificateInfo, MessageResponse>(new { Hostname = domain }, cancellationToken);
+                .GetResponse<CertificateInfo, MessageResponse>(new { Hostname = host }, cancellationToken);
             if (response.Is(out Response<MessageResponse>? error)) {
                 await context.RespondAsync(error.Message);
                 return;
@@ -73,7 +73,7 @@ public class UpdateSslMonitorHandler : IConsumer<UpdateSslMonitor> {
 
     private async Task Delete(SslMonitor? entity, ConsumeContext<UpdateSslMonitor> context) {
         var cancellationToken = context.CancellationToken;
-        var domain = context.Message.Domain;
+        var host = context.Message.Host;
         var chatId = context.Message.ChatId;
 
         if (entity is not null) {
@@ -82,8 +82,8 @@ public class UpdateSslMonitorHandler : IConsumer<UpdateSslMonitor> {
                 _db.SslMonitorByChat.Remove(monitor);
             }
 
-            if (await _db.DomainMonitorByChat.CountAsync(domainMonitor =>
-                        domainMonitor.DomainMonitorId == entity.Id,
+            if (await _db.SslMonitorByChat.CountAsync(monitor =>
+                        monitor.SslMonitorId == entity.Id,
                     cancellationToken) == 0) {
                 _db.SslMonitor.Remove(entity);
             }
@@ -92,6 +92,6 @@ public class UpdateSslMonitorHandler : IConsumer<UpdateSslMonitor> {
             await context.RespondAsync<MessageResponse>(new { Message = "Okay. Host has been deleted" });
         }
 
-        await context.RespondAsync<MessageResponse>(new { Message = $"Host `{domain}` was not found" });
+        await context.RespondAsync<MessageResponse>(new { Message = $"Host `{host}` was not found" });
     }
 }

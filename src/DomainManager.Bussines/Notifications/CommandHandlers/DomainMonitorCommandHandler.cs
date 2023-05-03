@@ -1,4 +1,3 @@
-using System.Text;
 using DomainManager.Models;
 using DomainManager.Requests;
 using MassTransit;
@@ -49,14 +48,12 @@ public class DomainMonitorCommandHandler : CommandHandlerBase {
 
         var domainMonitor = successResponse!.Message;
 
-        return new StringBuilder()
-            .AppendLine($"Domain `{domain}` has been added to monitoring")
-            .AppendLine()
-            .AppendLine("```")
-            .AppendLine($"{"Expires On:",-12} {domainMonitor.ExpirationDate}")
-            .AppendLine($"{"Last update:",-12} {domainMonitor.LastUpdateDate}")
-            .AppendLine("```")
-            .ToString();
+        return $"Domain `{domain}` has been added to monitoring\n" +
+               $"\n" +
+               $"```\n" +
+               $"Expired on:  {domainMonitor.ExpirationDate}\n" +
+               $"Last update: {domainMonitor.LastUpdateDate}\n" +
+               $"```";
     }
 
     private async Task<string> GetDomainList(Message message, CancellationToken cancellationToken) {
@@ -66,13 +63,14 @@ public class DomainMonitorCommandHandler : CommandHandlerBase {
             .Select(d => $"{d.Domain,-30} {d.ExpirationDate,17:g} {d.LastUpdateDate,17:g}")
             .ToListAsync(cancellationToken);
 
-        return monitors.Count == 0
-            ? "Add your first domain by `/domain_monitor [domain]`"
-            : new StringBuilder()
-                .AppendLine("```")
-                .AppendLine($"{"  Domain",-30} {"Expired on   ",17} {"Last update   ",17}")
-                .AppendLine(string.Join('\n', monitors))
-                .AppendLine("```")
-                .ToString();
+        return monitors.Count switch {
+            0 => "Add your first domain to monitor by `/domain_monitor domain.com`." +
+                 "Or `/domain_monitor help` to get command help",
+
+            _ => "```\n" +
+                 $"{"  Domain",-30} {"Expired on   ",17} {"Last update   ",17}\n" +
+                 string.Join('\n', monitors) + "\n" +
+                 "```"
+        };
     }
 }

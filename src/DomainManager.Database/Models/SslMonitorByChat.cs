@@ -4,5 +4,5 @@ public class SslMonitorByChat {
     public long ChatId { get; set; }
 
     public int SslMonitorId { get; set; }
-    public SslMonitor SslMonitor { get; set; }
+    public SslMonitor SslMonitor { get; set; } = null!;
 }
