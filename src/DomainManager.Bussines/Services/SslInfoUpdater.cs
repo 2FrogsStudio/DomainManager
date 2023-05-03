@@ -18,25 +18,22 @@ public class SslInfoUpdater : ISslInfoUpdater {
     public async Task<SslMonitor>
         UpdateCertificateInfo(long chatId, string domain, CancellationToken cancellationToken) {
         var entity = await _db.SslMonitor.FirstOrDefaultAsync(
-            d => d.Domain == domain,
-            cancellationToken);
+                         d => d.Domain == domain,
+                         cancellationToken)
+                     ?? new SslMonitor { Domain = domain };
 
-        if (entity is not null) {
-            if (DateTime.UtcNow - entity.LastUpdateDate >= _updateNoMoreThan) {
-                var response = await _mediator
-                    .CreateRequestClient<GetCertificateInfo>()
-                    .GetResponse<CertificateInfo>(new { Hostname = domain }, cancellationToken);
+        if (entity.LastUpdateDate is null || DateTime.UtcNow - entity.LastUpdateDate >= _updateNoMoreThan) {
+            var response = await _mediator
+                .CreateRequestClient<GetCertificateInfo>()
+                .GetResponse<CertificateInfo>(new { Hostname = domain }, cancellationToken);
 
-                var certInfo = response.Message;
+            var certInfo = response.Message;
 
-                entity.LastUpdateDate = DateTime.UtcNow;
-                entity.Issuer = certInfo.Issuer;
-                entity.NotAfter = certInfo.NotAfter.ToUniversalTime();
-                entity.NotBefore = certInfo.NotBefore.ToUniversalTime();
-                entity.Errors = certInfo.Errors;
-            }
-        } else {
-            entity ??= new SslMonitor { Domain = domain };
+            entity.LastUpdateDate = DateTime.UtcNow;
+            entity.Issuer = certInfo.Issuer;
+            entity.NotAfter = certInfo.NotAfter.ToUniversalTime();
+            entity.NotBefore = certInfo.NotBefore.ToUniversalTime();
+            entity.Errors = certInfo.Errors;
         }
 
         var updated = _db.SslMonitor.Update(entity);
@@ -52,8 +49,9 @@ public class SslInfoUpdater : ISslInfoUpdater {
                 ChatId = chatId,
                 SslMonitorId = entity.Id
             }, cancellationToken);
-            await _db.SaveChangesAsync(cancellationToken);
         }
+
+        await _db.SaveChangesAsync(cancellationToken);
 
         return entity;
     }

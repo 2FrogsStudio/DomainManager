@@ -32,7 +32,7 @@ public class SslMonitorCommandHandler : CommandHandlerBase {
                 ? "Add your first domain by `/ssl_monitor [domain]`"
                 : new StringBuilder()
                     .AppendLine("```")
-                    .AppendLine($"{"Domain",-30} {"Expired on   ",17} {"Updated on   ",17}")
+                    .AppendLine($"{"Domain",-30} {"Expired on   ",17} {"Last update   ",17}")
                     .AppendLine(string.Join('\n', sslMonitors))
                     .AppendLine("```")
                     .ToString();
@@ -60,16 +60,20 @@ public class SslMonitorCommandHandler : CommandHandlerBase {
         var sslExpire = await _sslInfoUpdater.UpdateCertificateInfo(message.Chat.Id, domain, cancellationToken);
 
         var text = new StringBuilder()
-            .AppendLine($"Domain {domain} added to monitoring")
-            .AppendLine($"Issued On: {sslExpire.NotBefore}")
-            .AppendLine($"Expires On: {sslExpire.NotAfter}")
-            .AppendLine($"Errors: {sslExpire.Errors}")
-            .AppendLine($"Last update: {sslExpire.LastUpdateDate}")
+            .AppendLine($"Domain `{domain}` has been added to monitoring")
+            .AppendLine()
+            .AppendLine("```")
+            .AppendLine($"{"Issued On:",-12} {sslExpire.NotBefore}")
+            .AppendLine($"{"Expires On:",-12} {sslExpire.NotAfter}")
+            .AppendLine($"{"Last update:",-12} {sslExpire.LastUpdateDate}")
+            .AppendLine($"{"Errors:",-12} {sslExpire.Errors}")
+            .AppendLine("```")
             .ToString();
 
         await _botClient.SendTextMessageAsync(
             message.Chat.Id,
             text,
+            ParseMode.Markdown,
             replyToMessageId: message.MessageId,
             cancellationToken: cancellationToken
         );
