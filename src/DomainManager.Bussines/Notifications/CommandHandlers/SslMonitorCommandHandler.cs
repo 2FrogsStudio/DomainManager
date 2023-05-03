@@ -35,9 +35,13 @@ public class SslMonitorCommandHandler : CommandHandlerBase {
         }
 
         var response = await _mediator.CreateRequestClient<UpdateSslMonitor>()
-            .GetResponse<SslMonitor, ErrorResponse>(new { ChatId = message.Chat.Id, Domain = domain },
+            .GetResponse<SslMonitor, MessageResponse>(new {
+                    ChatId = message.Chat.Id,
+                    Domain = domain,
+                    Delete = args is [_, "remove", ..]
+                },
                 cancellationToken);
-        if (response.Is(out Response<ErrorResponse>? error)) {
+        if (response.Is(out Response<MessageResponse>? error)) {
             return $"Error:{error.Message.Message}";
         }
 

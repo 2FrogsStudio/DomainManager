@@ -31,12 +31,12 @@ public class GetCertificateInfoHandler : IConsumer<GetCertificateInfo> {
             sslStream.Close();
             client.Close();
         } catch (Exception e) {
-            await context.RespondAsync<ErrorResponse>(new { e.Message });
+            await context.RespondAsync<MessageResponse>(new { e.Message });
             return;
         }
 
         if (certInfo is null) {
-            await context.RespondAsync<ErrorResponse>(new { Message = "Something went wrong" });
+            await context.RespondAsync<MessageResponse>(new { Message = "Something went wrong" });
             return;
         }
 

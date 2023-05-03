@@ -13,7 +13,7 @@ public enum Command {
         Help = "`/domain_monitor` - get list of your domains to monitor\n" +
                "`/domain_monitor help` - get this help\n" +
                "`/domain_monitor [domain]` - add domain to monitoring\n" +
-               "`/domain_monitor remove [domain]` - delete domain from monitoring")]
+               "`/domain_monitor [domain] remove` - delete domain from monitoring")]
     DomainMonitor,
 
     [Command("/ssl_monitor",
@@ -21,6 +21,6 @@ public enum Command {
         Help = "`/ssl_monitor` - get list of your hosts to monitor\n" +
                "`/ssl_monitor help` - get this help\n" +
                "`/ssl_monitor [host]` - add host to monitoring\n" +
-               "`/ssl_monitor remove [host]` - delete host from monitoring")]
+               "`/ssl_monitor [host] remove` - delete host from monitoring")]
     SslMonitor
 }

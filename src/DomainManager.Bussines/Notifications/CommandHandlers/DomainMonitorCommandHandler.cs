@@ -33,12 +33,13 @@ public class DomainMonitorCommandHandler : CommandHandlerBase {
         }
 
         var response = await _mediator.CreateRequestClient<UpdateDomainMonitor>()
-            .GetResponse<DomainMonitor, ErrorResponse>(new {
+            .GetResponse<DomainMonitor, MessageResponse>(new {
                 Domain = domain,
-                ChatId = message.Chat.Id
+                ChatId = message.Chat.Id,
+                Delete = args is [_, "remove", ..]
             }, cancellationToken);
 
-        if (response.Is(out Response<ErrorResponse>? error)) {
+        if (response.Is(out Response<MessageResponse>? error)) {
             return error.Message.Message;
         }
 
