@@ -25,13 +25,16 @@ builder.Services.AddHttpClient("TelegramBotClient")
 
         return new TelegramBotClient(botToken, client);
     });
+builder.Services.AddHttpClient("CertificateExpiration")
+    .ConfigurePrimaryHttpMessageHandler<CertificateToResponseHandler>();
+builder.Services.AddSingleton<CertificateToResponseHandler>();
 builder.Services.AddMassTransit(configurator => configurator.UsingInMemory())
     .AddMediator(cfg => cfg.AddConsumers(typeof(UpdateNotification).Assembly));
 builder.Services.AddHostedService<PullingService>()
     .AddTransient<IUpdateHandler, UpdateHandler>();
 builder.Services.AddSingleton<IStaticService, StaticService>();
 builder.Services.AddHostedService<BotInit>();
-builder.Services.AddWhoisService();
+builder.Services.AddBusiness();
 builder.AddApplicationDbContext();
 
 var host = builder.Build();

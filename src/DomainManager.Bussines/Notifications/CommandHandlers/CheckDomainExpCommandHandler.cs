@@ -6,12 +6,12 @@ using Whois;
 
 namespace DomainManager.Notifications.CommandHandlers;
 
-public class ExpirationCommandHandler : CommandHandlerBase {
+public class CheckDomainExpCommandHandler : CommandHandlerBase {
     private readonly ITelegramBotClient _botClient;
     private readonly IWhoisLookup _whoisLookup;
 
-    public ExpirationCommandHandler(ITelegramBotClient botClient, IWhoisLookup whoisLookup) :
-        base(Command.Expiration) {
+    public CheckDomainExpCommandHandler(ITelegramBotClient botClient, IWhoisLookup whoisLookup) :
+        base(Command.DomainExpire) {
         _botClient = botClient;
         _whoisLookup = whoisLookup;
     }
@@ -27,7 +27,7 @@ public class ExpirationCommandHandler : CommandHandlerBase {
             return;
         }
 
-        if (!TryGetDomainFromInput(args[0], out var domain)) {
+        if (!args[0].TryGetDomainFromInput(out var domain)) {
             await _botClient.SendTextMessageAsync(
                 message.Chat.Id,
                 "Domain format is not valid. Should be like google.com",
@@ -48,19 +48,4 @@ public class ExpirationCommandHandler : CommandHandlerBase {
             cancellationToken: cancellationToken
         );
     }
-
-
-    private static bool TryGetDomainFromInput(string input, out string domain) {
-        domain = input;
-        return true;
-        // if (!input.Contains(Uri.SchemeDelimiter)) {
-        //     input = string.Concat(Uri.UriSchemeHttp, Uri.SchemeDelimiter, input);
-        // }
-        //
-        // domain = new Uri(input).Host;
-        // return true;
-    }
-
-    // [GeneratedRegex("/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\\.[a-zA-Z]{2,}$/", RegexOptions.Compiled)]
-    // private static partial Regex DomainRegex();
 }

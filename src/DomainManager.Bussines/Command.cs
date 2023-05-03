@@ -11,6 +11,9 @@ public enum Command {
     [Command("/providers", Description = "Get supported providers")]
     Providers,
 
-    [Command("/expiration", Description = "Get expiration date for domain e.g.`/whois google.com`")]
-    Expiration
+    [Command("/domain_expire", Description = "Monitor domain expiration e.g.`/domain_expire google.com`")]
+    DomainExpire,
+
+    [Command("/ssl_expire", Description = "Monitor SSL expiration e.g.`/ssl_expire google.com`")]
+    SslExpire
 }

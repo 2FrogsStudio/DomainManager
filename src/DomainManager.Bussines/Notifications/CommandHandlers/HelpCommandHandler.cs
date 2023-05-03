@@ -22,7 +22,7 @@ public class HelpCommandHandler : CommandHandlerBase {
 
         await _botClient.SendTextMessageAsync(
             message.Chat.Id,
-            text,
+            text.Replace("_", @"\_"),
             ParseMode.Markdown,
             replyMarkup: new ReplyKeyboardRemove(),
             cancellationToken: cancellationToken);
