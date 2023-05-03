@@ -6,7 +6,7 @@ namespace DomainManager;
 
 public class ApplicationDbContext : DbContext {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
-    public DbSet<DomainMonitor> DnsMonitor { get; set; } = null!;
+    public DbSet<DomainMonitor> DomainMonitor { get; set; } = null!;
     public DbSet<SslMonitor> SslMonitor { get; set; } = null!;
 
     public DbSet<DomainMonitorByChat> DomainMonitorByChat { get; set; } = null!;

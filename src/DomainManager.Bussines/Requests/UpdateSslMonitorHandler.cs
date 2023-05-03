@@ -1,22 +1,25 @@
 using DomainManager.Models;
-using DomainManager.Requests;
+using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.EntityFrameworkCore;
 
-namespace DomainManager.Services;
+namespace DomainManager.Requests;
 
-public class SslInfoUpdater : ISslInfoUpdater {
+public class UpdateSslMonitorHandler : IConsumer<UpdateSslMonitor> {
     private readonly ApplicationDbContext _db;
-    private readonly IMediator _mediator;
+    private readonly IScopedMediator _mediator;
     private readonly TimeSpan _updateNoMoreThan = TimeSpan.FromHours(1);
 
-    public SslInfoUpdater(ApplicationDbContext db, IMediator mediator) {
+    public UpdateSslMonitorHandler(ApplicationDbContext db, IScopedMediator mediator) {
         _db = db;
         _mediator = mediator;
     }
 
-    public async Task<SslMonitor>
-        UpdateCertificateInfo(long chatId, string domain, CancellationToken cancellationToken) {
+    public async Task Consume(ConsumeContext<UpdateSslMonitor> context) {
+        var cancellationToken = context.CancellationToken;
+        var domain = context.Message.Domain;
+        var chatId = context.Message.ChatId;
+
         var entity = await _db.SslMonitor.FirstOrDefaultAsync(
                          d => d.Domain == domain,
                          cancellationToken)
@@ -41,10 +44,10 @@ public class SslInfoUpdater : ISslInfoUpdater {
             await _db.SaveChangesAsync(cancellationToken);
         }
 
-        var sslMonitorByChat =
+        var monitorByChat =
             await _db.SslMonitorByChat.FindAsync(new object[] { chatId, entity.Id }, cancellationToken);
 
-        if (sslMonitorByChat is null) {
+        if (monitorByChat is null) {
             await _db.SslMonitorByChat.AddAsync(new SslMonitorByChat {
                 ChatId = chatId,
                 SslMonitorId = entity.Id
@@ -53,6 +56,6 @@ public class SslInfoUpdater : ISslInfoUpdater {
 
         await _db.SaveChangesAsync(cancellationToken);
 
-        return entity;
+        await context.RespondAsync(entity);
     }
 }
