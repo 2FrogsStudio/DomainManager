@@ -4,81 +4,49 @@ using DomainManager.Requests;
 using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 
 namespace DomainManager.Notifications.CommandHandlers;
 
 public class SslMonitorCommandHandler : CommandHandlerBase {
     private readonly ITelegramBotClient _botClient;
     private readonly ApplicationDbContext _db;
+    private readonly ILogger<SslMonitorCommandHandler> _logger;
     private readonly IScopedMediator _mediator;
 
-    public SslMonitorCommandHandler(ITelegramBotClient botClient, ApplicationDbContext db, IScopedMediator mediator) :
-        base(Command.SslMonitor) {
+    public SslMonitorCommandHandler(ITelegramBotClient botClient, ApplicationDbContext db, IScopedMediator mediator,
+        ILogger<SslMonitorCommandHandler> logger) :
+        base(Command.SslMonitor, botClient) {
         _botClient = botClient;
         _db = db;
         _mediator = mediator;
+        _logger = logger;
     }
 
-    protected override async Task Consume(string[] args, Message message, CancellationToken cancellationToken) {
+    protected override async Task<string> Consume(string[] args, Message message, CancellationToken cancellationToken) {
         if (args.Length is 0) {
-            var monitors = await _db.SslMonitorByChat
-                .Where(m => m.ChatId == message.Chat.Id)
-                .Select(m => m.SslMonitor)
-                .Select(d => $"{d.Domain,-30} {d.NotAfter,17:g} {d.LastUpdateDate,17:g}")
-                .ToListAsync(cancellationToken);
-
-            var messageText = monitors.Count == 0
-                ? "Add your first domain by `/ssl_monitor [domain]`"
-                : new StringBuilder()
-                    .AppendLine("```")
-                    .AppendLine($"{"Domain",-30} {"Expired on   ",17} {"Last update   ",17}")
-                    .AppendLine(string.Join('\n', monitors))
-                    .AppendLine("```")
-                    .ToString();
-
-            await _botClient.SendTextMessageAsync(
-                message.Chat.Id,
-                messageText,
-                ParseMode.Markdown,
-                replyToMessageId: message.MessageId,
-                cancellationToken: cancellationToken
-            );
-            return;
+            return await GetHostList(message, cancellationToken);
         }
 
         if (!args[0].TryGetDomainFromInput(out var domain)) {
-            await _botClient.SendTextMessageAsync(
-                message.Chat.Id,
-                "Domain format is not valid. Should be like google.com",
-                replyToMessageId: message.MessageId,
-                cancellationToken: cancellationToken
-            );
-            return;
+            return "Domain format is not valid. Should be like google.com";
         }
 
         var response = await _mediator.CreateRequestClient<UpdateSslMonitor>()
             .GetResponse<SslMonitor, ErrorResponse>(new { ChatId = message.Chat.Id, Domain = domain },
                 cancellationToken);
         if (response.Is(out Response<ErrorResponse>? error)) {
-            await _botClient.SendTextMessageAsync(
-                message.Chat.Id,
-                error.Message.Message,
-                ParseMode.Markdown,
-                replyToMessageId: message.MessageId,
-                cancellationToken: cancellationToken
-            );
-            return;
+            return $"Error:{error.Message.Message}";
         }
 
         if (!response.Is(out Response<SslMonitor>? sslMonitorResponse)) {
-            throw new InvalidOperationException();
+            _logger.LogError(new InvalidOperationException(), "Something went wrong");
         }
 
-        var sslMonitor = sslMonitorResponse.Message;
-        var text = new StringBuilder()
+        var sslMonitor = sslMonitorResponse!.Message;
+        return new StringBuilder()
             .AppendLine($"Domain `{domain}` has been added to monitoring")
             .AppendLine()
             .AppendLine("```")
@@ -88,13 +56,22 @@ public class SslMonitorCommandHandler : CommandHandlerBase {
             .AppendLine($"{"Errors:",-12} {sslMonitor.Errors}")
             .AppendLine("```")
             .ToString();
+    }
 
-        await _botClient.SendTextMessageAsync(
-            message.Chat.Id,
-            text,
-            ParseMode.Markdown,
-            replyToMessageId: message.MessageId,
-            cancellationToken: cancellationToken
-        );
+    private async Task<string> GetHostList(Message message, CancellationToken cancellationToken) {
+        var monitors = await _db.SslMonitorByChat
+            .Where(m => m.ChatId == message.Chat.Id)
+            .Select(m => m.SslMonitor)
+            .Select(d => $"{d.Domain,-30} {d.NotAfter,17:g} {d.LastUpdateDate,17:g}")
+            .ToListAsync(cancellationToken);
+
+        return monitors.Count == 0
+            ? "Add your first domain by `/ssl_monitor [domain]`"
+            : new StringBuilder()
+                .AppendLine("```")
+                .AppendLine($"{"  Domain",-30} {"Expired on   ",17} {"Last update   ",17}")
+                .AppendLine(string.Join('\n', monitors))
+                .AppendLine("```")
+                .ToString();
     }
 }
