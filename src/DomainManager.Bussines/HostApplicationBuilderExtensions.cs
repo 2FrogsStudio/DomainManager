@@ -42,7 +42,7 @@ public static class HostApplicationBuilderExtensions {
                 cfg.AddConsumers(type => type.IsAssignableTo(typeof(IMediatorConsumer)),
                     typeof(SendCommandNotificationConsumer).Assembly);
             })
-            .AddMassTransit<ISecondBus>(x => {
+            .AddMassTransit<IBus>(x => {
                 x.AddQuartzConsumers();
                 x.AddConsumers(type => !type.IsAssignableTo(typeof(IMediatorConsumer)),
                     typeof(UpdateAndNotifyJobConsumer).Assembly);
@@ -56,5 +56,3 @@ public static class HostApplicationBuilderExtensions {
         return builder;
     }
 }
-
-public interface ISecondBus : IBus { }
