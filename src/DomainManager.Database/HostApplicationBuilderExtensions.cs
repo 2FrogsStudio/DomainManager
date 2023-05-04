@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 namespace DomainManager;
 
 public static class HostApplicationBuilderExtensions {
-    public static HostApplicationBuilder AddApplicationDbContext(this HostApplicationBuilder builder) {
+    public static HostApplicationBuilder AddDatabase(this HostApplicationBuilder builder) {
         builder.Services
             .AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("Supabase")));
