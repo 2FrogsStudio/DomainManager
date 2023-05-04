@@ -66,8 +66,8 @@ public class SslMonitorCommandHandler : CommandHandlerBase, IMediatorConsumer {
             .ToListAsync(cancellationToken);
 
         return monitors.Count switch {
-            0 => "Add your first host by `/ssl_monitor my.site.com`\n" +
-                 "Or `/ssl_monitor help` to get command help",
+            0 => "Add your first host by `/ssl_monitor my.site.com`.\n" +
+                 "Or `/ssl_monitor help` to get command help.",
 
             _ => "```\n" +
                  $"{"  Host",-30} {"Expired on   ",17} {"Last update   ",17}\n" +

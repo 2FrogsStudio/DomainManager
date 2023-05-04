@@ -65,8 +65,8 @@ public class DomainMonitorCommandHandler : CommandHandlerBase, IMediatorConsumer
             .ToListAsync(cancellationToken);
 
         return monitors.Count switch {
-            0 => "Add your first domain to monitor by `/domain_monitor domain.com`." +
-                 "Or `/domain_monitor help` to get command help",
+            0 => "Add your first domain to monitor by `/domain_monitor domain.com`.\n" +
+                 "Or `/domain_monitor help` to get command help.",
 
             _ => "```\n" +
                  $"{"  Domain",-30} {"Expired on   ",17} {"Last update   ",17}\n" +
