@@ -6,12 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DomainManager.Requests;
 
-public class UpdateSslMonitorHandler : IConsumer<UpdateSslMonitor>, IMediatorConsumer {
+public class UpdateSslMonitorConsumer : IConsumer<UpdateSslMonitor>, IMediatorConsumer {
     private readonly ApplicationDbContext _db;
     private readonly IScopedMediator _mediator;
     private readonly TimeSpan _updateNoMoreThan = TimeSpan.FromHours(1);
 
-    public UpdateSslMonitorHandler(ApplicationDbContext db, IScopedMediator mediator) {
+    public UpdateSslMonitorConsumer(ApplicationDbContext db, IScopedMediator mediator) {
         _db = db;
         _mediator = mediator;
     }

@@ -1,5 +1,6 @@
 using DomainManager.Abstract;
 using DomainManager.Models;
+using DomainManager.Notifications.CommandConsumers.Base;
 using DomainManager.Requests;
 using MassTransit;
 using MassTransit.Mediator;
@@ -8,16 +9,16 @@ using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace DomainManager.Notifications.CommandHandlers;
+namespace DomainManager.Notifications.CommandConsumers;
 
-public class SslMonitorCommandHandler : CommandHandlerBase, IMediatorConsumer {
+public class SslMonitorCommandConsumer : CommandConsumerBase, IMediatorConsumer {
     private readonly ITelegramBotClient _botClient;
     private readonly ApplicationDbContext _db;
-    private readonly ILogger<SslMonitorCommandHandler> _logger;
+    private readonly ILogger<SslMonitorCommandConsumer> _logger;
     private readonly IScopedMediator _mediator;
 
-    public SslMonitorCommandHandler(ITelegramBotClient botClient, ApplicationDbContext db, IScopedMediator mediator,
-        ILogger<SslMonitorCommandHandler> logger) :
+    public SslMonitorCommandConsumer(ITelegramBotClient botClient, ApplicationDbContext db, IScopedMediator mediator,
+        ILogger<SslMonitorCommandConsumer> logger) :
         base(Command.SslMonitor, botClient) {
         _botClient = botClient;
         _db = db;

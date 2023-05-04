@@ -1,11 +1,12 @@
 using DomainManager.Abstract;
+using DomainManager.Notifications.CommandConsumers.Base;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace DomainManager.Notifications.CommandHandlers;
+namespace DomainManager.Notifications.CommandConsumers;
 
-public class HelpCommandHandler : CommandHandlerBase, IMediatorConsumer {
-    public HelpCommandHandler(ITelegramBotClient botClient) : base(Command.Help, botClient) { }
+public class HelpCommandConsumer : CommandConsumerBase, IMediatorConsumer {
+    public HelpCommandConsumer(ITelegramBotClient botClient) : base(Command.Help, botClient) { }
 
     protected override Task<string> Consume(string[] args, Message message, CancellationToken cancellationToken) {
         var commandHelps =

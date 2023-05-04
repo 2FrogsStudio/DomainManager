@@ -8,7 +8,7 @@ using Quartz;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 
-namespace DomainManager.Notifications.UpdateHandlers;
+namespace DomainManager.Notifications.UpdateConsumers;
 
 public class ScheduleAndUpdateJobActivatorConsumer : IConsumer<UpdateNotification>, IMediatorConsumer {
     private readonly ITelegramBotClient _botClient;

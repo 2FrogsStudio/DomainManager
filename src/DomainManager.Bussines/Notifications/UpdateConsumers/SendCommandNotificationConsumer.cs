@@ -8,17 +8,17 @@ using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace DomainManager.Notifications.UpdateHandlers;
+namespace DomainManager.Notifications.UpdateConsumers;
 
-public class SendCommandNotificationHandler : IConsumer<UpdateNotification>, IMediatorConsumer {
+public class SendCommandNotificationConsumer : IConsumer<UpdateNotification>, IMediatorConsumer {
     private readonly ITelegramBotClient _botClient;
     private readonly IHostEnvironment _hostEnvironment;
-    private readonly ILogger<SendCommandNotificationHandler> _logger;
+    private readonly ILogger<SendCommandNotificationConsumer> _logger;
     private readonly IScopedMediator _mediator;
     private readonly IStaticService _staticService;
 
-    public SendCommandNotificationHandler(IScopedMediator mediator, IStaticService staticService,
-        ILogger<SendCommandNotificationHandler> logger, IHostEnvironment hostEnvironment,
+    public SendCommandNotificationConsumer(IScopedMediator mediator, IStaticService staticService,
+        ILogger<SendCommandNotificationConsumer> logger, IHostEnvironment hostEnvironment,
         ITelegramBotClient botClient) {
         _mediator = mediator;
         _staticService = staticService;

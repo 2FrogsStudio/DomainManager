@@ -1,5 +1,6 @@
 using DomainManager.Abstract;
 using DomainManager.Models;
+using DomainManager.Notifications.CommandConsumers.Base;
 using DomainManager.Requests;
 using MassTransit;
 using MassTransit.Mediator;
@@ -8,15 +9,15 @@ using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace DomainManager.Notifications.CommandHandlers;
+namespace DomainManager.Notifications.CommandConsumers;
 
-public class DomainMonitorCommandHandler : CommandHandlerBase, IMediatorConsumer {
+public class DomainMonitorCommandConsumer : CommandConsumerBase, IMediatorConsumer {
     private readonly ApplicationDbContext _db;
-    private readonly ILogger<DomainMonitorCommandHandler> _logger;
+    private readonly ILogger<DomainMonitorCommandConsumer> _logger;
     private readonly IScopedMediator _mediator;
 
-    public DomainMonitorCommandHandler(ITelegramBotClient botClient, ApplicationDbContext db,
-        IScopedMediator mediator, ILogger<DomainMonitorCommandHandler> logger) :
+    public DomainMonitorCommandConsumer(ITelegramBotClient botClient, ApplicationDbContext db,
+        IScopedMediator mediator, ILogger<DomainMonitorCommandConsumer> logger) :
         base(Command.DomainMonitor, botClient) {
         _db = db;
         _mediator = mediator;

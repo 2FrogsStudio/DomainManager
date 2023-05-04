@@ -3,13 +3,13 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
-namespace DomainManager.Notifications;
+namespace DomainManager.Notifications.CommandConsumers.Base;
 
-public abstract class CommandHandlerBase : IConsumer<CommandNotification> {
+public abstract class CommandConsumerBase : IConsumer<CommandNotification> {
     private readonly ITelegramBotClient _botClient;
     private readonly Command _command;
 
-    protected CommandHandlerBase(Command command, ITelegramBotClient botClient) {
+    protected CommandConsumerBase(Command command, ITelegramBotClient botClient) {
         _command = command;
         _botClient = botClient;
     }

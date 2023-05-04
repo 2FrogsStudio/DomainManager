@@ -1,7 +1,7 @@
 using DomainManager.Abstract;
 using DomainManager.Configuration;
 using DomainManager.Jobs;
-using DomainManager.Notifications.UpdateHandlers;
+using DomainManager.Notifications.UpdateConsumers;
 using DomainManager.Services;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
@@ -40,7 +40,7 @@ public static class HostApplicationBuilderExtensions {
         builder.Services
             .AddMediator(cfg => {
                 cfg.AddConsumers(type => type.IsAssignableTo(typeof(IMediatorConsumer)),
-                    typeof(SendCommandNotificationHandler).Assembly);
+                    typeof(SendCommandNotificationConsumer).Assembly);
             })
             .AddMassTransit<ISecondBus>(x => {
                 x.AddQuartzConsumers();

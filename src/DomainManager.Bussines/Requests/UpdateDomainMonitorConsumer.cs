@@ -6,13 +6,13 @@ using Whois;
 
 namespace DomainManager.Requests;
 
-public class UpdateDomainMonitorHandler : IConsumer<UpdateDomainMonitor>, IMediatorConsumer {
+public class UpdateDomainMonitorConsumer : IConsumer<UpdateDomainMonitor>, IMediatorConsumer {
     private readonly ApplicationDbContext _db;
     private readonly TimeSpan _updateNoMoreThan = TimeSpan.FromHours(1);
 
     private readonly IWhoisLookup _whoisLookup;
 
-    public UpdateDomainMonitorHandler(IWhoisLookup whoisLookup, ApplicationDbContext db) {
+    public UpdateDomainMonitorConsumer(IWhoisLookup whoisLookup, ApplicationDbContext db) {
         _whoisLookup = whoisLookup;
         _db = db;
     }

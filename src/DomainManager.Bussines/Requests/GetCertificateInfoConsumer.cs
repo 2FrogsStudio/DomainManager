@@ -6,7 +6,7 @@ using MassTransit;
 
 namespace DomainManager.Requests;
 
-public class GetCertificateInfoHandler : IConsumer<GetCertificateInfo>, IMediatorConsumer {
+public class GetCertificateInfoConsumer : IConsumer<GetCertificateInfo>, IMediatorConsumer {
     public async Task Consume(ConsumeContext<GetCertificateInfo> context) {
         CertificateInfo? certInfo;
         try {
