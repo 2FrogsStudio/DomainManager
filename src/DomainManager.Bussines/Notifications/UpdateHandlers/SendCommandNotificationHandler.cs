@@ -1,4 +1,5 @@
-﻿using DomainManager.Services;
+﻿using DomainManager.Abstract;
+using DomainManager.Services;
 using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.Extensions.Hosting;
@@ -9,7 +10,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace DomainManager.Notifications.UpdateHandlers;
 
-public class SendCommandNotificationHandler : IConsumer<UpdateNotification> {
+public class SendCommandNotificationHandler : IConsumer<UpdateNotification>, IMediatorConsumer {
     private readonly ITelegramBotClient _botClient;
     private readonly IHostEnvironment _hostEnvironment;
     private readonly ILogger<SendCommandNotificationHandler> _logger;

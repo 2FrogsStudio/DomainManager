@@ -1,11 +1,12 @@
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
+using DomainManager.Abstract;
 using MassTransit;
 
 namespace DomainManager.Requests;
 
-public class GetCertificateInfoHandler : IConsumer<GetCertificateInfo> {
+public class GetCertificateInfoHandler : IConsumer<GetCertificateInfo>, IMediatorConsumer {
     public async Task Consume(ConsumeContext<GetCertificateInfo> context) {
         CertificateInfo? certInfo;
         try {

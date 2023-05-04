@@ -1,3 +1,4 @@
+using DomainManager.Abstract;
 using DomainManager.Models;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -5,7 +6,7 @@ using Whois;
 
 namespace DomainManager.Requests;
 
-public class UpdateDomainMonitorHandler : IConsumer<UpdateDomainMonitor> {
+public class UpdateDomainMonitorHandler : IConsumer<UpdateDomainMonitor>, IMediatorConsumer {
     private readonly ApplicationDbContext _db;
     private readonly TimeSpan _updateNoMoreThan = TimeSpan.FromHours(1);
 
@@ -32,16 +33,16 @@ public class UpdateDomainMonitorHandler : IConsumer<UpdateDomainMonitor> {
 
         entity ??= new DomainMonitor { Domain = domain };
         if (entity.LastUpdateDate is null || DateTime.UtcNow - entity.LastUpdateDate >= _updateNoMoreThan) {
-            WhoisResponse domainInfo;
+            WhoisResponse whois;
             try {
-                domainInfo = await _whoisLookup.LookupAsync(domain);
+                whois = await _whoisLookup.LookupAsync(domain);
             } catch (Exception e) {
                 await context.RespondAsync<MessageResponse>(new { e.Message });
                 return;
             }
 
             entity.LastUpdateDate = DateTime.UtcNow;
-            entity.ExpirationDate = domainInfo.Expiration?.ToUniversalTime();
+            entity.ExpirationDate = whois.Expiration?.ToUniversalTime();
         }
 
         var updated = _db.DomainMonitor.Update(entity);

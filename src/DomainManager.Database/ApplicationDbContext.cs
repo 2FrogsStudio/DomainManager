@@ -1,4 +1,3 @@
-using DomainManager.ModelConfigurations;
 using DomainManager.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,9 +13,6 @@ public class ApplicationDbContext : DbContext {
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         modelBuilder.HasCollation("case_insensitive", "en-u-ks-primary", "icu", false);
-        modelBuilder.ApplyConfiguration(new DomainMonitorConfiguration());
-        modelBuilder.ApplyConfiguration(new SslMonitorConfiguration());
-        modelBuilder.ApplyConfiguration(new DomainMonitorByChatConfiguration());
-        modelBuilder.ApplyConfiguration(new SslMonitorByChatConfiguration());
+        modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
     }
 }

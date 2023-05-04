@@ -1,3 +1,4 @@
+using DomainManager.Abstract;
 using DomainManager.Models;
 using MassTransit;
 using MassTransit.Mediator;
@@ -5,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DomainManager.Requests;
 
-public class UpdateSslMonitorHandler : IConsumer<UpdateSslMonitor> {
+public class UpdateSslMonitorHandler : IConsumer<UpdateSslMonitor>, IMediatorConsumer {
     private readonly ApplicationDbContext _db;
     private readonly IScopedMediator _mediator;
     private readonly TimeSpan _updateNoMoreThan = TimeSpan.FromHours(1);

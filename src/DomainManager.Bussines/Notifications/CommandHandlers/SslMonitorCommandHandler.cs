@@ -1,3 +1,4 @@
+using DomainManager.Abstract;
 using DomainManager.Models;
 using DomainManager.Requests;
 using MassTransit;
@@ -9,7 +10,7 @@ using Telegram.Bot.Types;
 
 namespace DomainManager.Notifications.CommandHandlers;
 
-public class SslMonitorCommandHandler : CommandHandlerBase {
+public class SslMonitorCommandHandler : CommandHandlerBase, IMediatorConsumer {
     private readonly ITelegramBotClient _botClient;
     private readonly ApplicationDbContext _db;
     private readonly ILogger<SslMonitorCommandHandler> _logger;
