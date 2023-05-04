@@ -10,13 +10,13 @@ using Telegram.Bot.Types.Enums;
 
 namespace DomainManager.Notifications.UpdateConsumers;
 
-public class ScheduleAndUpdateJobActivatorConsumer : IConsumer<UpdateNotification>, IMediatorConsumer {
+public class ScheduleUpdateAndNotifyJobConsumer : IConsumer<UpdateNotification>, IMediatorConsumer {
     private readonly ITelegramBotClient _botClient;
     private readonly IOptions<BotOptions> _botOptions;
     private readonly ISecondBus _bus;
-    private readonly ILogger<ScheduleAndUpdateJobActivatorConsumer> _logger;
+    private readonly ILogger<ScheduleUpdateAndNotifyJobConsumer> _logger;
 
-    public ScheduleAndUpdateJobActivatorConsumer(ILogger<ScheduleAndUpdateJobActivatorConsumer> logger,
+    public ScheduleUpdateAndNotifyJobConsumer(ILogger<ScheduleUpdateAndNotifyJobConsumer> logger,
         ITelegramBotClient botClient, IOptions<BotOptions> botOptions, ISecondBus bus) {
         _logger = logger;
         _botClient = botClient;

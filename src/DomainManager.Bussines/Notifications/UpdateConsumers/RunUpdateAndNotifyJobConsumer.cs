@@ -9,12 +9,12 @@ using Telegram.Bot.Types.Enums;
 
 namespace DomainManager.Notifications.UpdateConsumers;
 
-public class RunUpdateJobActivatorConsumer : IConsumer<UpdateNotification>, IMediatorConsumer {
+public class RunUpdateAndNotifyJobConsumer : IConsumer<UpdateNotification>, IMediatorConsumer {
     private readonly ITelegramBotClient _botClient;
     private readonly IOptions<BotOptions> _botOptions;
     private readonly ISendEndpointProvider _sendEndpoint;
 
-    public RunUpdateJobActivatorConsumer(ITelegramBotClient botClient, IOptions<BotOptions> botOptions,
+    public RunUpdateAndNotifyJobConsumer(ITelegramBotClient botClient, IOptions<BotOptions> botOptions,
         Bind<ISecondBus, ISendEndpointProvider> sendEndpointProvider) {
         _botClient = botClient;
         _botOptions = botOptions;
