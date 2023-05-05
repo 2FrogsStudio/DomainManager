@@ -30,9 +30,10 @@ jobs:
         working-directory: ${{ env.HOSTING_PATH }}
         run: |
           cat <<EOT >> .env
-          ASPNETCORE_ENVIRONMENT=Production
+          DOTNET_ENVIRONMENT=Production
           Bot__Token=${{ secrets.BOT_TOKEN }}
           ConnectionStrings__Supabase=${{secrets.SUPABASE_CONNECTION_STRING }}
+          SENTRY_DSN=${{ secrets.SENTRY_DSN }}
           EOT
 
       - name: Run app
