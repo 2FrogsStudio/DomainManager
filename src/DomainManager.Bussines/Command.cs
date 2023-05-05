@@ -26,5 +26,16 @@ public enum Command {
                "/ssl_monitor my.site.com         - add host to monitoring\n" +
                "/ssl_monitor my.site.com remove  - delete host from monitoring\n" +
                "```")]
-    SslMonitor
+    SslMonitor,
+
+    [Command("/schedule",
+        Description = "Schedule monitoring job",
+        Help = "```\n" +
+               "schedule [cron_expr] - enable monitoring job\n" +
+               "schedule off         - disable monitoring job\n" +
+               "schedule run         - force run updating job\n" +
+               "schedule status      - get job status\n" +
+               "  cron_expr e.g. '0 0 12 ? * 2-6 *' - fire monitoring job every 12 hours from monday to friday" +
+               "```")]
+    Schedule
 }

@@ -1,81 +1,53 @@
 ﻿using DomainManager.Abstract;
-using DomainManager.Configuration;
 using DomainManager.Jobs;
+using DomainManager.Notifications.CommandConsumers.Base;
 using MassTransit;
 using MassTransit.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Quartz;
 using Quartz.Spi;
 using Telegram.Bot;
-using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types;
 
-namespace DomainManager.Notifications.UpdateConsumers;
+namespace DomainManager.Notifications.CommandConsumers;
 
-public class ScheduleUpdateAndNotifyJobConsumer : IConsumer<UpdateNotification>, IMediatorConsumer {
-    private const string Help = "```\n" +
-                                "schedule [cron_expr] - enable monitoring job\n" +
-                                "schedule off         - disable monitoring job\n" +
-                                "schedule run         - force run updating job\n" +
-                                "schedule status      - get job status\n" +
-                                "  cron_expr e.g. '0 0 12 ? * 2-6 *' - fire monitoring job every 12 hours from monday to friday" +
-                                "```";
-
+public class ScheduleUpdateAndNotifyJobConsumer : CommandConsumerBase, IMediatorConsumer {
     private static readonly TimeSpan MinimumScheduleTime = TimeSpan.FromHours(1);
 
     private readonly ITelegramBotClient _botClient;
-    private readonly IOptions<BotOptions> _botOptions;
     private readonly IBus _bus;
     private readonly ILogger<ScheduleUpdateAndNotifyJobConsumer> _logger;
     private readonly ISchedulerFactory _schedulerFactory;
     private readonly ISendEndpointProvider _sendEndpointProvider;
 
     public ScheduleUpdateAndNotifyJobConsumer(ILogger<ScheduleUpdateAndNotifyJobConsumer> logger,
-        ITelegramBotClient botClient, IOptions<BotOptions> botOptions, IBus bus,
-        ISchedulerFactory schedulerFactory, Bind<IBus, ISendEndpointProvider> sendEndpointProvider) {
+        ITelegramBotClient botClient, IBus bus, ISchedulerFactory schedulerFactory,
+        Bind<IBus, ISendEndpointProvider> sendEndpointProvider) : base(
+        Command.Schedule, botClient) {
         _logger = logger;
         _botClient = botClient;
-        _botOptions = botOptions;
         _bus = bus;
         _schedulerFactory = schedulerFactory;
         _sendEndpointProvider = sendEndpointProvider.Value;
     }
 
-    public async Task Consume(ConsumeContext<UpdateNotification> context) {
-        var update = context.Message.Update;
-        var cancellationToken = context.CancellationToken;
-
-        if (update is not {
-                Message : {
-                    Text: { } messageText,
-                    MessageId: var messageId,
-                    Chat.Id: var chatId,
-                    From.Id: var fromId
-                }
+    protected override async Task<string> Consume(string[] args, Message message, CancellationToken cancellationToken) {
+        if (message is not {
+                Chat.Id: var chatId,
+                From.Id: var fromId
             }
-            || !_botOptions.Value.AdminUserIds.Contains(fromId)
-            // can be private chat with admin
-            || !(_botOptions.Value.AdminUserIds.Contains(chatId) || _botOptions.Value.AdminGroupIds.Contains(chatId))
-            || !messageText.StartsWith("schedule")) {
-            return;
+            || (chatId != fromId
+                && !(await GetAdminIds(chatId, cancellationToken)).Contains(fromId))
+           ) {
+            return "You have not access to configure schedule";
         }
 
-        var replyMessage = messageText.Split(' ', 2) switch {
-            ["schedule", "off"] => await DisableSchedule(chatId),
-            ["schedule", "status"] => await GetSchedule(chatId, cancellationToken),
-            ["schedule", "run"] => await RunSchedule(chatId, cancellationToken),
-            ["schedule", "help"] => Help,
-            ["schedule", var cron] => await EnableSchedule(chatId, cron, cancellationToken),
-            _ => Help
+        return args switch {
+            ["off", ..] => await DisableSchedule(chatId),
+            ["status", ..] => await GetSchedule(chatId, cancellationToken),
+            ["run", ..] => await RunSchedule(chatId, cancellationToken),
+            _ => await EnableSchedule(chatId, string.Join(' ', args), cancellationToken)
         };
-
-        await _botClient.SendTextMessageAsync(
-            chatId,
-            replyMessage,
-            ParseMode.Markdown,
-            replyToMessageId: messageId,
-            cancellationToken: context.CancellationToken
-        );
     }
 
     private async Task<string> RunSchedule(long chatId, CancellationToken cancellationToken) {
@@ -156,5 +128,11 @@ public class ScheduleUpdateAndNotifyJobConsumer : IConsumer<UpdateNotification>,
         var sendEndpoint = await _bus.GetSendEndpoint(new Uri("queue:quartz"));
         await sendEndpoint.CancelScheduledRecurringSend(schedule.ScheduleId, schedule.ScheduleGroup);
         return "Monitoring job has been disabled";
+    }
+
+    private async Task<long[]> GetAdminIds(long chatId, CancellationToken cancellationToken) {
+        return (await _botClient.GetChatAdministratorsAsync(chatId, cancellationToken))
+            .Select(a => a.User.Id)
+            .ToArray();
     }
 }
