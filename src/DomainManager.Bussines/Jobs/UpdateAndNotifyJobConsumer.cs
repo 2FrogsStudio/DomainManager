@@ -28,62 +28,56 @@ public class UpdateAndNotifyJobConsumer : IConsumer<UpdateAndNotifyJob> {
     }
 
     public async Task Consume(ConsumeContext<UpdateAndNotifyJob> context) {
-        _logger.LogDebug("Start updating..");
+        var chatId = context.Message.ChatId;
+        _logger.LogDebug("Updating by {ChatId}..", chatId);
+
         var cancellationToken = context.CancellationToken;
-        await UpdateDomainMonitors(cancellationToken);
-        await UpdateSslMonitors(cancellationToken);
 
-        await NotifyDomainMonitors(cancellationToken);
-        await NotifySslMonitors(cancellationToken);
-        _logger.LogDebug("Updating finished");
+        await UpdateDomainMonitors(chatId, cancellationToken);
+        await UpdateSslMonitors(chatId, cancellationToken);
+
+        await NotifyDomainMonitors(chatId, cancellationToken);
+        await NotifySslMonitors(chatId, cancellationToken);
+
+        _logger.LogDebug("Updating by {ChatId}.. Done", chatId);
     }
 
-    private async Task NotifySslMonitors(CancellationToken cancellationToken) {
-        var almostExpiredMessages = (await _db.SslMonitor
-                .Where(monitor => monitor.NotAfter - DateTime.UtcNow <= _expirationTimeSpan)
-                .Select(monitor => monitor.SslMonitors)
-                .SelectMany(dm => dm)
-                .Select(dm => new
-                    { dm.ChatId, dm.SslMonitor.Host, dm.SslMonitor.NotAfter, dm.SslMonitor.LastUpdateDate })
-                .ToArrayAsync(cancellationToken))
-            .GroupBy(dm => dm.ChatId, arg => arg,
-                (chatId, expiration) => new { chatId, expiration }
-            );
-
-        foreach (var ax in almostExpiredMessages) {
-            var text = "Almost expired SSL certificate list:\n" +
-                       "```\n" +
-                       $"{"  Host",-30} {"Expired on   ",17} {"Last update   ",17}\n" +
-                       string.Join('\n',
-                           ax.expiration.Select(d => $"{d.Host,-30} {d.NotAfter,17:g} {d.LastUpdateDate,17:g}")) +
-                       "```";
-            await SendNotification(ax.chatId, text, cancellationToken);
+    private async Task NotifySslMonitors(long chatId, CancellationToken cancellationToken) {
+        var almostExpiredMonitors = await _db.SslMonitorByChat
+            .Where(m => m.ChatId == chatId)
+            .Select(m => m.SslMonitor)
+            .Where(m => m.NotAfter - DateTime.UtcNow <= _expirationTimeSpan)
+            .ToArrayAsync(cancellationToken);
+        if (almostExpiredMonitors.Length == 0) {
+            return;
         }
+        var text = "Almost expired SSL certificate list:\n" +
+                   "```\n" +
+                   $"{"  Host",-30} {"Expired on   ",17} {"Last update   ",17}\n" +
+                   string.Join('\n',
+                       almostExpiredMonitors.Select(d => $"{d.Host,-30} {d.NotAfter,17:g} {d.LastUpdateDate,17:g}")) +
+                   "```";
+        await SendNotification(chatId, text, cancellationToken);
     }
 
-    private async Task NotifyDomainMonitors(CancellationToken cancellationToken) {
-        var almostExpiredMessages = (await _db.DomainMonitor
-                .Where(monitor => monitor.ExpirationDate - DateTime.UtcNow <= _expirationTimeSpan)
-                .Select(monitor => monitor.DomainMonitors)
-                .SelectMany(dm => dm)
-                .Select(dm => new {
-                    dm.ChatId, dm.DomainMonitor.Domain, dm.DomainMonitor.ExpirationDate, dm.DomainMonitor.LastUpdateDate
-                })
-                .ToArrayAsync(cancellationToken))
-            .GroupBy(dm => dm.ChatId, arg => arg,
-                (chatId, expiration) => new { chatId, expiration }
-            );
+    private async Task NotifyDomainMonitors(long chatId, CancellationToken cancellationToken) {
+        var almostExpiredMonitors = await _db.DomainMonitorByChat
+            .Where(m => m.ChatId == chatId)
+            .Select(m => m.DomainMonitor)
+            .Where(m => m.ExpirationDate - DateTime.UtcNow <= _expirationTimeSpan)
+            .ToArrayAsync(cancellationToken);
 
-        foreach (var ax in almostExpiredMessages) {
-            var text = "Almost expired domain list:\n" +
-                       "```\n" +
-                       $"{"  Domain",-30} {"Expired on   ",17} {"Last update   ",17}\n" +
-                       string.Join('\n',
-                           ax.expiration.Select(d =>
-                               $"{d.Domain,-30} {d.ExpirationDate,17:g} {d.LastUpdateDate,17:g}")) +
-                       "```";
-            await SendNotification(ax.chatId, text, cancellationToken);
+        if (almostExpiredMonitors.Length == 0) {
+            return;
         }
+        var text = "Almost expired domain list:\n" +
+                   "```\n" +
+                   $"{"  Domain",-30} {"Expired on   ",17} {"Last update   ",17}\n" +
+                   string.Join('\n',
+                       almostExpiredMonitors.Select(d =>
+                           $"{d.Domain,-30} {d.ExpirationDate,17:g} {d.LastUpdateDate,17:g}")) +
+                   "```";
+        await SendNotification(chatId, text, cancellationToken);
     }
 
     private async Task SendNotification(long chatId, string text, CancellationToken cancellationToken) {
@@ -99,25 +93,28 @@ public class UpdateAndNotifyJobConsumer : IConsumer<UpdateAndNotifyJob> {
         }
     }
 
-    private async Task UpdateDomainMonitors(CancellationToken cancellationToken) {
-        foreach (var monitor in await _db.DomainMonitor.ToArrayAsync(cancellationToken)) {
-            _logger.LogDebug("Updating Domain monitor: {Domain}", monitor.Domain);
+    private async Task UpdateDomainMonitors(long chatId, CancellationToken cancellationToken) {
+        var monitors = await _db.DomainMonitorByChat.Where(db => db.ChatId == chatId)
+            .Select(dm => dm.DomainMonitor).ToArrayAsync(cancellationToken);
+        foreach (var monitor in monitors) {
+            _logger.LogDebug("Updating by {ChatId} Domain: {Domain}..", chatId, monitor.Domain);
             try {
                 var whois = await _whoisLookup.LookupAsync(monitor.Domain);
                 monitor.LastUpdateDate = DateTime.UtcNow;
                 monitor.ExpirationDate = whois.Expiration?.ToUniversalTime();
             } catch (Exception ex) {
-                _logger.LogWarning(ex, "Failed to update domain monitor {Domain}", monitor.Domain);
+                _logger.LogWarning(ex, "Failed to update domain monitor {ChatId} {Domain}", chatId, monitor.Domain);
             }
+            _logger.LogDebug("Updating by {ChatId} Domain: {Domain}.. Done", chatId, monitor.Domain);
         }
-
         await _db.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task UpdateSslMonitors(CancellationToken cancellationToken) {
-        foreach (var monitor in await _db.SslMonitor.ToArrayAsync(cancellationToken)) {
-            _logger.LogDebug("Updating SSL monitor: {Domain}", monitor.Host);
-
+    private async Task UpdateSslMonitors(long chatId, CancellationToken cancellationToken) {
+        var monitors = await _db.SslMonitorByChat.Where(m => m.ChatId == chatId).Select(m => m.SslMonitor)
+            .ToArrayAsync(cancellationToken);
+        foreach (var monitor in monitors) {
+            _logger.LogDebug("Updating by {ChatId} Host: {Host}.. ", chatId, monitor.Host);
             var response = await _mediator
                 .CreateRequestClient<GetCertificateInfo>()
                 .GetResponse<CertificateInfo, MessageResponse>(new { Hostname = monitor.Host }, cancellationToken);
@@ -129,6 +126,7 @@ public class UpdateAndNotifyJobConsumer : IConsumer<UpdateAndNotifyJob> {
                 monitor.NotAfter = certInfo.NotAfter.ToUniversalTime();
                 monitor.NotBefore = certInfo.NotBefore.ToUniversalTime();
                 monitor.Errors = certInfo.Errors;
+                _logger.LogDebug("Updating by {ChatId} Host: {Host}.. Done", chatId, monitor.Host);
                 continue;
             }
 
@@ -140,7 +138,6 @@ public class UpdateAndNotifyJobConsumer : IConsumer<UpdateAndNotifyJob> {
 
             throw new UnreachableException();
         }
-
         await _db.SaveChangesAsync(cancellationToken);
     }
 }
