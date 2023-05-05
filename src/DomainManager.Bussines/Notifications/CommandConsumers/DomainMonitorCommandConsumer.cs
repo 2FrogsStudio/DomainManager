@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using DomainManager.Abstract;
 using DomainManager.Models;
 using DomainManager.Notifications.CommandConsumers.Base;
@@ -13,7 +14,6 @@ namespace DomainManager.Notifications.CommandConsumers;
 
 public class DomainMonitorCommandConsumer : CommandConsumerBase, IMediatorConsumer {
     private readonly ApplicationDbContext _db;
-    private readonly ILogger<DomainMonitorCommandConsumer> _logger;
     private readonly IScopedMediator _mediator;
 
     public DomainMonitorCommandConsumer(ITelegramBotClient botClient, ApplicationDbContext db,
@@ -21,7 +21,6 @@ public class DomainMonitorCommandConsumer : CommandConsumerBase, IMediatorConsum
         base(Command.DomainMonitor, botClient) {
         _db = db;
         _mediator = mediator;
-        _logger = logger;
     }
 
     protected override async Task<string> Consume(string[] args, Message message, CancellationToken cancellationToken) {
@@ -29,33 +28,39 @@ public class DomainMonitorCommandConsumer : CommandConsumerBase, IMediatorConsum
             return await GetDomainList(message, cancellationToken);
         }
 
-        if (!args[0].TryGetDomainFromInput(out var domain)) {
-            return "Domain format is not valid. Should be like google.com";
-        }
+        var chatId = message.Chat.Id;
+        return args switch {
+            ["list", ..] => await GetDomainList(message, cancellationToken),
+            ["delete", { } host] => await Update(chatId, host, true, cancellationToken),
+            ["add", { } host] => await Update(chatId, host, false, cancellationToken),
+            _ => CommandHelpers.CommandAttributeByCommand[Command.SslMonitor]!.Help!
+        };
+    }
 
+    private async Task<string> Update(object chatId, string domain, bool delete, CancellationToken cancellationToken) {
         var response = await _mediator.CreateRequestClient<UpdateDomainMonitor>()
             .GetResponse<DomainMonitor, MessageResponse>(new {
                 Domain = domain,
-                ChatId = message.Chat.Id,
-                Delete = args is [_, "remove", ..]
+                ChatId = chatId,
+                Delete = delete
             }, cancellationToken);
+
+        if (response.Is(out Response<DomainMonitor>? successResponse)) {
+            var domainMonitor = successResponse!.Message;
+
+            return $"Domain `{domain}` has been added to monitoring\n" +
+                   $"\n" +
+                   $"```\n" +
+                   $"Expired on:  {domainMonitor.ExpirationDate}\n" +
+                   $"Last update: {domainMonitor.LastUpdateDate}\n" +
+                   $"```";
+        }
 
         if (response.Is(out Response<MessageResponse>? error)) {
             return error.Message.Message;
         }
 
-        if (!response.Is(out Response<DomainMonitor>? successResponse)) {
-            _logger.LogError(new InvalidOperationException(), "Something went wrong");
-        }
-
-        var domainMonitor = successResponse!.Message;
-
-        return $"Domain `{domain}` has been added to monitoring\n" +
-               $"\n" +
-               $"```\n" +
-               $"Expired on:  {domainMonitor.ExpirationDate}\n" +
-               $"Last update: {domainMonitor.LastUpdateDate}\n" +
-               $"```";
+        throw new UnreachableException();
     }
 
     private async Task<string> GetDomainList(Message message, CancellationToken cancellationToken) {
@@ -66,7 +71,7 @@ public class DomainMonitorCommandConsumer : CommandConsumerBase, IMediatorConsum
             .ToListAsync(cancellationToken);
 
         return monitors.Count switch {
-            0 => "Add your first domain to monitor by `/domain_monitor domain.com`.\n" +
+            0 => "Add your first domain to monitor by `/domain_monitor add domain.com`.\n" +
                  "Or `/domain_monitor help` to get command help.",
 
             _ => "```\n" +
