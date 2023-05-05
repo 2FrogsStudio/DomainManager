@@ -67,7 +67,8 @@ public class DomainMonitorCommandConsumer : CommandConsumerBase, IMediatorConsum
         var monitors = await _db.DomainMonitorByChat
             .Where(m => m.ChatId == message.Chat.Id)
             .Select(m => m.DomainMonitor)
-            .Select(d => $"{d.Domain,-30} {d.ExpirationDate,17:g} {d.LastUpdateDate,17:g}")
+            .OrderBy(m => m.ExpirationDate)
+            .Select(d => $"{d.ExpirationDate,12:d} | {d.Domain}")
             .ToListAsync(cancellationToken);
 
         return monitors.Count switch {
@@ -75,7 +76,7 @@ public class DomainMonitorCommandConsumer : CommandConsumerBase, IMediatorConsum
                  "Or `/domain_monitor help` to get command help.",
 
             _ => "```\n" +
-                 $"{"  Domain",-30} {"Expired on   ",17} {"Last update   ",17}\n" +
+                 "Expired on   | Domain\n" +
                  string.Join('\n', monitors) + "\n" +
                  "```"
         };

@@ -47,15 +47,16 @@ public class UpdateAndNotifyJobConsumer : IConsumer<UpdateAndNotifyJob> {
             .Where(m => m.ChatId == chatId)
             .Select(m => m.SslMonitor)
             .Where(m => m.NotAfter - DateTime.UtcNow <= _expirationTimeSpan)
+            .OrderBy(m => m.NotAfter)
+            .Select(d => $"{d.NotAfter,12:s} {d.Host}")
             .ToArrayAsync(cancellationToken);
         if (almostExpiredMonitors.Length == 0) {
             return;
         }
         var text = "Almost expired SSL certificate list:\n" +
                    "```\n" +
-                   $"{"  Host",-30} {"Expired on   ",17} {"Last update   ",17}\n" +
-                   string.Join('\n',
-                       almostExpiredMonitors.Select(d => $"{d.Host,-30} {d.NotAfter,17:g} {d.LastUpdateDate,17:g}")) +
+                   "Expired on   | Host\n" +
+                   string.Join('\n', almostExpiredMonitors) +
                    "```";
         await SendNotification(chatId, text, cancellationToken);
     }
@@ -65,6 +66,8 @@ public class UpdateAndNotifyJobConsumer : IConsumer<UpdateAndNotifyJob> {
             .Where(m => m.ChatId == chatId)
             .Select(m => m.DomainMonitor)
             .Where(m => m.ExpirationDate - DateTime.UtcNow <= _expirationTimeSpan)
+            .OrderBy(m => m.ExpirationDate)
+            .Select(d => $"{d.ExpirationDate,12:d} {d.Domain}")
             .ToArrayAsync(cancellationToken);
 
         if (almostExpiredMonitors.Length == 0) {
@@ -72,10 +75,8 @@ public class UpdateAndNotifyJobConsumer : IConsumer<UpdateAndNotifyJob> {
         }
         var text = "Almost expired domain list:\n" +
                    "```\n" +
-                   $"{"  Domain",-30} {"Expired on   ",17} {"Last update   ",17}\n" +
-                   string.Join('\n',
-                       almostExpiredMonitors.Select(d =>
-                           $"{d.Domain,-30} {d.ExpirationDate,17:g} {d.LastUpdateDate,17:g}")) +
+                   "Expired on   | Domain\n" +
+                   string.Join('\n', almostExpiredMonitors) +
                    "```";
         await SendNotification(chatId, text, cancellationToken);
     }

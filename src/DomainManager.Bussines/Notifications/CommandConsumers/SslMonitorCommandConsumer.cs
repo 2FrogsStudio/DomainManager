@@ -64,7 +64,8 @@ public class SslMonitorCommandConsumer : CommandConsumerBase, IMediatorConsumer 
         var monitors = await _db.SslMonitorByChat
             .Where(m => m.ChatId == message.Chat.Id)
             .Select(m => m.SslMonitor)
-            .Select(d => $"{d.Host,-30} {d.NotAfter,17:g} {d.LastUpdateDate,17:g}")
+            .OrderBy(m => m.NotAfter)
+            .Select(d => $"{d.NotAfter,12:d} | {d.Host}")
             .ToListAsync(cancellationToken);
 
         return monitors.Count switch {
@@ -72,7 +73,7 @@ public class SslMonitorCommandConsumer : CommandConsumerBase, IMediatorConsumer 
                  "Or `/ssl_monitor help` to get command help.",
 
             _ => "```\n" +
-                 $"{"  Host",-30} {"Expired on   ",17} {"Last update   ",17}\n" +
+                 "Expired on   | Host\n" +
                  string.Join('\n', monitors) + "\n" +
                  "```"
         };
