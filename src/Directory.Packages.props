@@ -17,11 +17,11 @@
     <PackageVersion Include="Microsoft.NET.Build.Containers" Version="0.4.0" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
     <PackageVersion Include="Sentry.Extensions.Logging" Version="3.31.0" />
+    <PackageVersion Include="Serilog.Enrichers.Environment" Version="2.2.0" />
     <PackageVersion Include="Serilog.Extensions.Hosting" Version="5.0.1" />
-    <PackageVersion Include="Serilog.Formatting.Compact" Version="1.1.0" />
     <PackageVersion Include="Serilog.Settings.Configuration" Version="3.4.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="4.1.0" />
-    <PackageVersion Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Elasticsearch" Version="9.0.0" />
     <PackageVersion Include="Telegram.Bot" Version="18.0.0" />
     <PackageVersion Include="Whois" Version="3.0.1" />
   </ItemGroup>

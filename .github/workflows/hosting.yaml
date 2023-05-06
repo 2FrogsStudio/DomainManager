@@ -34,12 +34,13 @@ jobs:
           Bot__Token=${{ secrets.BOT_TOKEN }}
           ConnectionStrings__Postgres=${{secrets.SUPABASE_CONNECTION_STRING }}
           SENTRY_DSN=${{ secrets.SENTRY_DSN }}
+          Serilog__WriteTo__Elasticsearch__Args__nodeUris=${{ secrets.SEMATEXT_ELASTICSEARCH_URIS }}
           EOT
 
       - name: Run app
         working-directory: ${{ env.HOSTING_PATH }}
         run: |
-          docker compose -f docker-compose.yaml -f docker-compose.logs.yaml up --pull=always
+          docker compose up --pull=always
 
       - name: Logs to artifact
         if: always()
