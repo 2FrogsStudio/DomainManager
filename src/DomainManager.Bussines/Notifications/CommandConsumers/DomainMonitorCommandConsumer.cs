@@ -6,7 +6,7 @@ using DomainManager.Requests;
 using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Caching.Memory;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -17,13 +17,14 @@ public class DomainMonitorCommandConsumer : CommandConsumerBase, IMediatorConsum
     private readonly IScopedMediator _mediator;
 
     public DomainMonitorCommandConsumer(ITelegramBotClient botClient, ApplicationDbContext db,
-        IScopedMediator mediator, ILogger<DomainMonitorCommandConsumer> logger) :
-        base(Command.DomainMonitor, botClient) {
+        IScopedMediator mediator, IMemoryCache memoryCache) :
+        base(Command.DomainMonitor, botClient, memoryCache) {
         _db = db;
         _mediator = mediator;
     }
 
-    protected override async Task<string> Consume(string[] args, Message message, CancellationToken cancellationToken) {
+    protected override async Task<string> Consume(string[] args, Message message, long chatId1, bool isAdmin,
+        CancellationToken cancellationToken) {
         if (args.Length is 0) {
             return await GetDomainList(message, cancellationToken);
         }
@@ -31,8 +32,10 @@ public class DomainMonitorCommandConsumer : CommandConsumerBase, IMediatorConsum
         var chatId = message.Chat.Id;
         return args switch {
             ["list", ..] => await GetDomainList(message, cancellationToken),
-            ["delete", { } host] => await Update(chatId, host, true, cancellationToken),
-            ["add", { } host] => await Update(chatId, host, false, cancellationToken),
+            ["add", { } host] when isAdmin => await Update(chatId, host, false, cancellationToken),
+            ["add", not null] => "You have no access to add host",
+            ["delete", { } host] when isAdmin => await Update(chatId, host, true, cancellationToken),
+            ["delete", not null] => "You have no access to delete host",
             _ => CommandHelpers.CommandAttributeByCommand[Command.SslMonitor]!.Help!
         };
     }

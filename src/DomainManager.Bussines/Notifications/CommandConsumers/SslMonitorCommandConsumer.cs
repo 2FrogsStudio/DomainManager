@@ -6,7 +6,7 @@ using DomainManager.Requests;
 using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Caching.Memory;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -17,22 +17,24 @@ public class SslMonitorCommandConsumer : CommandConsumerBase, IMediatorConsumer 
     private readonly IScopedMediator _mediator;
 
     public SslMonitorCommandConsumer(ITelegramBotClient botClient, ApplicationDbContext db, IScopedMediator mediator,
-        ILogger<SslMonitorCommandConsumer> logger) :
-        base(Command.SslMonitor, botClient) {
+        IMemoryCache memoryCache) :
+        base(Command.SslMonitor, botClient, memoryCache) {
         _db = db;
         _mediator = mediator;
     }
 
-    protected override async Task<string> Consume(string[] args, Message message, CancellationToken cancellationToken) {
+    protected override async Task<string> Consume(string[] args, Message message, long chatId, bool isAdmin,
+        CancellationToken cancellationToken) {
         if (args.Length is 0) {
             return await GetHostList(message, cancellationToken);
         }
 
-        var chatId = message.Chat.Id;
         return args switch {
             ["list", ..] => await GetHostList(message, cancellationToken),
-            ["delete", { } host] => await Update(chatId, host, true, cancellationToken),
-            ["add", { } host] => await Update(chatId, host, false, cancellationToken),
+            ["add", { } host] when isAdmin => await Update(chatId, host, false, cancellationToken),
+            ["add", not null] => "You have not access to add domains",
+            ["delete", { } host] when isAdmin => await Update(chatId, host, true, cancellationToken),
+            ["delete", not null] => "You have not access to delete domains",
             _ => CommandHelpers.CommandAttributeByCommand[Command.SslMonitor]!.Help!
         };
     }

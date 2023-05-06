@@ -3,6 +3,7 @@ using DomainManager.Jobs;
 using DomainManager.Notifications.CommandConsumers.Base;
 using MassTransit;
 using MassTransit.DependencyInjection;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Quartz;
 using Quartz.Spi;
@@ -14,7 +15,6 @@ namespace DomainManager.Notifications.CommandConsumers;
 public class ScheduleUpdateAndNotifyJobConsumer : CommandConsumerBase, IMediatorConsumer {
     private static readonly TimeSpan MinimumScheduleTime = TimeSpan.FromHours(1);
 
-    private readonly ITelegramBotClient _botClient;
     private readonly IBus _bus;
     private readonly ILogger<ScheduleUpdateAndNotifyJobConsumer> _logger;
     private readonly ISchedulerFactory _schedulerFactory;
@@ -22,31 +22,24 @@ public class ScheduleUpdateAndNotifyJobConsumer : CommandConsumerBase, IMediator
 
     public ScheduleUpdateAndNotifyJobConsumer(ILogger<ScheduleUpdateAndNotifyJobConsumer> logger,
         ITelegramBotClient botClient, IBus bus, ISchedulerFactory schedulerFactory,
-        Bind<IBus, ISendEndpointProvider> sendEndpointProvider) : base(
-        Command.Schedule, botClient) {
+        Bind<IBus, ISendEndpointProvider> sendEndpointProvider, IMemoryCache memoryCache) : base(
+        Command.Schedule, botClient, memoryCache) {
         _logger = logger;
-        _botClient = botClient;
         _bus = bus;
         _schedulerFactory = schedulerFactory;
         _sendEndpointProvider = sendEndpointProvider.Value;
     }
 
-    protected override async Task<string> Consume(string[] args, Message message, CancellationToken cancellationToken) {
-        if (message is not {
-                Chat.Id: var chatId,
-                From.Id: var fromId
-            }
-            || (chatId != fromId
-                && !(await GetAdminIds(chatId, cancellationToken)).Contains(fromId))
-           ) {
-            return "You have not access to configure schedule";
-        }
-
+    protected override async Task<string> Consume(string[] args, Message message, long chatId, bool isAdmin,
+        CancellationToken cancellationToken) {
         return args switch {
-            ["off", ..] => await DisableSchedule(chatId),
             ["status", ..] => await GetSchedule(chatId, cancellationToken),
-            ["run", ..] => await RunSchedule(chatId, cancellationToken),
-            _ => await EnableSchedule(chatId, string.Join(' ', args), cancellationToken)
+            ["off", ..] when isAdmin => await DisableSchedule(chatId),
+            ["off", ..] => "You have no access to control job",
+            ["run", ..] when isAdmin => await RunSchedule(chatId, cancellationToken),
+            ["run", ..] => "You have no access to control job",
+            _ when isAdmin => await EnableSchedule(chatId, string.Join(' ', args), cancellationToken),
+            _ => "You have no access to control job"
         };
     }
 
@@ -128,11 +121,5 @@ public class ScheduleUpdateAndNotifyJobConsumer : CommandConsumerBase, IMediator
         var sendEndpoint = await _bus.GetSendEndpoint(new Uri("queue:quartz"));
         await sendEndpoint.CancelScheduledRecurringSend(schedule.ScheduleId, schedule.ScheduleGroup);
         return "Monitoring job has been disabled";
-    }
-
-    private async Task<long[]> GetAdminIds(long chatId, CancellationToken cancellationToken) {
-        return (await _botClient.GetChatAdministratorsAsync(chatId, cancellationToken))
-            .Select(a => a.User.Id)
-            .ToArray();
     }
 }

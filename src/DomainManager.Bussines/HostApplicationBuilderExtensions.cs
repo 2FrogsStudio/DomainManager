@@ -19,6 +19,7 @@ public static class HostApplicationBuilderExtensions {
     public static HostApplicationBuilder AddBusiness(this HostApplicationBuilder builder) {
         builder.Services.Configure<BotOptions>(builder.Configuration.GetSection("Bot"));
 
+        builder.Services.AddMemoryCache();
         builder.Services.AddHttpClient("TelegramBotClient")
             .AddTypedClient<ITelegramBotClient>((client, provider) => {
                 var botToken = provider.GetRequiredService<IOptions<BotOptions>>().Value.Token;
