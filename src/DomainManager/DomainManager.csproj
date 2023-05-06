@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <ContainerImageName>2frogsstudio/domain-manager</ContainerImageName>
-    <ContainerImageTags>latest</ContainerImageTags>
+    <ContainerImageTags Condition="$(ContainerImageTags) == ''">latest</ContainerImageTags>
     <UserSecretsId>e8ff8a33-26c2-4848-9af5-f59c9791147a</UserSecretsId>
   </PropertyGroup>
 
