@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 
 namespace DomainManager;
@@ -14,6 +15,13 @@ public static class HostApplicationBuilderExtensions {
 
             loggingBuilder.AddSentry(options => { options.Environment = builder.Environment.EnvironmentName; });
         });
+        return builder;
+    }
+
+    public static HostApplicationBuilder AddMemoryCache(this HostApplicationBuilder builder) {
+        builder.Services.AddMemoryCache();
+        builder.Services.Configure<MemoryCacheOptions>(builder.Configuration.GetSection("MemoryCache"));
+
         return builder;
     }
 }
