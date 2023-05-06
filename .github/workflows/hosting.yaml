@@ -29,7 +29,7 @@ jobs:
       - name: Create .env file
         working-directory: ${{ env.HOSTING_PATH }}
         run: |
-          cat <<EOT >> .env
+          cat <<EOT > .env
           DOTNET_ENVIRONMENT=Production
           Bot__Token=${{ secrets.BOT_TOKEN }}
           ConnectionStrings__Postgres=${{secrets.SUPABASE_CONNECTION_STRING }}
