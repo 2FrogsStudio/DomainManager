@@ -9,7 +9,7 @@ public static class HostApplicationBuilderExtensions {
     public static HostApplicationBuilder AddDatabase(this HostApplicationBuilder builder) {
         builder.Services
             .AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("Supabase")));
+                options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
         return builder;
     }
 }

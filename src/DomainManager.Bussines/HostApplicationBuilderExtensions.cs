@@ -33,7 +33,7 @@ public static class HostApplicationBuilderExtensions {
             q.UseMicrosoftDependencyInjectionJobFactory();
             q.UsePersistentStore(s => {
                 s.UsePostgres(server =>
-                    server.ConnectionString = builder.Configuration.GetConnectionString("Supabase")!);
+                    server.ConnectionString = builder.Configuration.GetConnectionString("Postgres")!);
                 s.UseJsonSerializer();
                 s.UseClustering();
             });
