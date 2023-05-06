@@ -39,4 +39,11 @@ jobs:
       - name: Run app
         working-directory: ${{ env.HOSTING_PATH }}
         run: |
-          docker compose up --pull=always
+          docker compose -f docker-compose.yaml -f docker-compose.logs.yaml up --pull=always
+
+      - name: Logs to artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: logs
+          path: .hosting/logs/**
