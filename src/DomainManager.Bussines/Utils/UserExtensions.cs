@@ -1,5 +1,3 @@
-using Telegram.Bot.Types;
-
 namespace DomainManager.Utils;
 
 public static class UserExtensions {

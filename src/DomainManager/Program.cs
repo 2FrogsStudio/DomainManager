@@ -1,5 +1,3 @@
-using DomainManager;
-
 var host = Host.CreateApplicationBuilder(args)
     .AddLogging()
     .AddMemoryCache()

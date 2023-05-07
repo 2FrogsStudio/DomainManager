@@ -1,5 +1,3 @@
-using Telegram.Bot.Types;
-
 namespace DomainManager.Notifications;
 
 public record UpdateNotification {

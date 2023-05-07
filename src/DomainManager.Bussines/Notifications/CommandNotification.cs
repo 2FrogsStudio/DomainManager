@@ -1,5 +1,3 @@
-using Telegram.Bot.Types;
-
 namespace DomainManager.Notifications;
 
 // ReSharper disable once ClassNeverInstantiated.Global

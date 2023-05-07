@@ -3,7 +3,6 @@ using DomainManager.Services;
 using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;

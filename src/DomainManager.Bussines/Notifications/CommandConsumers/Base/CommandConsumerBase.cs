@@ -1,7 +1,6 @@
 using MassTransit;
 using Microsoft.Extensions.Caching.Memory;
 using Telegram.Bot;
-using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 namespace DomainManager.Notifications.CommandConsumers.Base;

@@ -14,7 +14,7 @@ public class GetCertificateInfoConsumer : IConsumer<GetCertificateInfo>, IMediat
             var hostname = context.Message.Hostname;
 
             using var client = new TcpClient(hostname, 443);
-            await using var sslStream = new SslStream(client.GetStream(), false, (_, cert, chain, errors) => {
+            await using var sslStream = new SslStream(client.GetStream(), false, (_, cert, _, errors) => {
                 if (cert is null) {
                     return true;
                 }

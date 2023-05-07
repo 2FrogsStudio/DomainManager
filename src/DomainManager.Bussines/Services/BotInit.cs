@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Hosting;
 using Telegram.Bot;
-using Telegram.Bot.Types;
 
 namespace DomainManager.Services;
 

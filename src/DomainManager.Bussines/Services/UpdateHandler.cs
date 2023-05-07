@@ -1,11 +1,9 @@
 using DomainManager.Notifications;
 using MassTransit.Mediator;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
-using Telegram.Bot.Types;
 
 namespace DomainManager.Services;
 

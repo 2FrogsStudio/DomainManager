@@ -8,7 +8,6 @@ using MassTransit.Mediator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Telegram.Bot;
-using Telegram.Bot.Types;
 
 namespace DomainManager.Notifications.CommandConsumers;
 

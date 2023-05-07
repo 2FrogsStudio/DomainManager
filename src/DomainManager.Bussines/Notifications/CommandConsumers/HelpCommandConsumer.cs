@@ -2,7 +2,6 @@ using DomainManager.Abstract;
 using DomainManager.Notifications.CommandConsumers.Base;
 using Microsoft.Extensions.Caching.Memory;
 using Telegram.Bot;
-using Telegram.Bot.Types;
 
 namespace DomainManager.Notifications.CommandConsumers;
 

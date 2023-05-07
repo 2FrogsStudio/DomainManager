@@ -4,11 +4,9 @@ using DomainManager.Notifications.CommandConsumers.Base;
 using MassTransit;
 using MassTransit.DependencyInjection;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 using Quartz;
 using Quartz.Spi;
 using Telegram.Bot;
-using Telegram.Bot.Types;
 
 namespace DomainManager.Notifications.CommandConsumers;
 

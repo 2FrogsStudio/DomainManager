@@ -1,6 +1,3 @@
-using DomainManager.Models;
-using Microsoft.EntityFrameworkCore;
-
 namespace DomainManager;
 
 public class ApplicationDbContext : DbContext {

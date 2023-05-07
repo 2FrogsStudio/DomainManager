@@ -79,18 +79,17 @@ public class UpdateSslMonitorConsumer : IConsumer<UpdateSslMonitor>, IMediatorCo
 
         if (entity is not null) {
             if (await _db.SslMonitorByChat
-                    .FindAsync(new object[] { chatId, entity.Id }, cancellationToken) is { } monitor) {
-                _db.SslMonitorByChat.Remove(monitor);
+                    .FindAsync(new object[] { chatId, entity.Id }, cancellationToken) is { } monitorByChat) {
+                _db.SslMonitorByChat.Remove(monitorByChat);
             }
 
             if (await _db.SslMonitorByChat.CountAsync(monitor =>
-                        monitor.SslMonitorId == entity.Id,
-                    cancellationToken) == 0) {
+                    monitor.SslMonitorId == entity.Id, cancellationToken) == 0) {
                 _db.SslMonitor.Remove(entity);
             }
 
             await _db.SaveChangesAsync(cancellationToken);
-            await context.RespondAsync<MessageResponse>(new { Message = "Okay. Host has been deleted" });
+            await context.RespondAsync<MessageResponse>(new { Message = $"Okay. Host `{host}` has been deleted" });
         }
 
         await context.RespondAsync<MessageResponse>(new { Message = $"Host `{host}` was not found" });

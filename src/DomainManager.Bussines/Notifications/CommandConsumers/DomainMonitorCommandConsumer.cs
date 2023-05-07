@@ -8,7 +8,6 @@ using MassTransit.Mediator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Telegram.Bot;
-using Telegram.Bot.Types;
 
 namespace DomainManager.Notifications.CommandConsumers;
 
@@ -49,7 +48,7 @@ public class DomainMonitorCommandConsumer : CommandConsumerBase, IMediatorConsum
             }, cancellationToken);
 
         if (response.Is(out Response<DomainMonitor>? successResponse)) {
-            var domainMonitor = successResponse!.Message;
+            var domainMonitor = successResponse.Message;
 
             return $"Domain `{domain}` has been added to monitoring\n" +
                    $"\n" +
