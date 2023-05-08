@@ -13,17 +13,15 @@ namespace DomainManager.Notifications.CommandConsumers;
 public class ScheduleUpdateAndNotifyJobConsumer : CommandConsumerBase, IMediatorConsumer {
     private static readonly TimeSpan MinimumScheduleTime = TimeSpan.FromHours(1);
 
-    private readonly IBus _bus;
     private readonly ILogger<ScheduleUpdateAndNotifyJobConsumer> _logger;
     private readonly ISchedulerFactory _schedulerFactory;
     private readonly ISendEndpointProvider _sendEndpointProvider;
 
     public ScheduleUpdateAndNotifyJobConsumer(ILogger<ScheduleUpdateAndNotifyJobConsumer> logger,
-        ITelegramBotClient botClient, IBus bus, ISchedulerFactory schedulerFactory,
+        ITelegramBotClient botClient, ISchedulerFactory schedulerFactory,
         Bind<IBus, ISendEndpointProvider> sendEndpointProvider, IMemoryCache memoryCache) : base(
         Command.Schedule, botClient, memoryCache) {
         _logger = logger;
-        _bus = bus;
         _schedulerFactory = schedulerFactory;
         _sendEndpointProvider = sendEndpointProvider.Value;
     }
@@ -99,7 +97,7 @@ public class ScheduleUpdateAndNotifyJobConsumer : CommandConsumerBase, IMediator
 
     private async Task<string> EnableSchedule(long chatId, string cron, CancellationToken cancellationToken) {
         if (TryCheckCronExpression(cron, out var error)) {
-            var sendEndpoint = await _bus.GetSendEndpoint(new Uri("queue:quartz"));
+            var sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri("queue:quartz"));
             var formatter = DefaultEndpointNameFormatter.Instance.Consumer<UpdateAndNotifyJobConsumer>();
             var endpoint = new Uri($"queue:{formatter}");
             var schedule = new UpdateAndNotifyJobSystemSchedule(cron, chatId);
@@ -116,7 +114,7 @@ public class ScheduleUpdateAndNotifyJobConsumer : CommandConsumerBase, IMediator
 
     private async Task<string> DisableSchedule(long chatId) {
         var schedule = new UpdateAndNotifyJobSystemSchedule(chatId);
-        var sendEndpoint = await _bus.GetSendEndpoint(new Uri("queue:quartz"));
+        var sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri("queue:quartz"));
         await sendEndpoint.CancelScheduledRecurringSend(schedule.ScheduleId, schedule.ScheduleGroup);
         return "Monitoring job has been disabled";
     }
