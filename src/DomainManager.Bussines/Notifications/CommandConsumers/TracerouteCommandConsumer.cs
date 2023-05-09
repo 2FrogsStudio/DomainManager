@@ -19,28 +19,22 @@ public class TracerouteCommandConsumer : CommandConsumerBase, IMediatorConsumer 
         };
     }
 
-    private async Task<string> TracerouteCommand(string host, CancellationToken cancellationToken) {
+    private static async Task<string> TracerouteCommand(string host) {
         var result = "";
-        using (Ping pingSender = new Ping())
-        {
-            for (int ttl = 1; ttl <= 30; ttl++)
-            {
-                PingOptions options = new PingOptions(ttl, true);
-                PingReply reply = pingSender.Send(host, 5000, new byte[32], options);
+        using var pingSender = new Ping();
+        for (var ttl = 1; ttl <= 30; ttl++) {
+            var options = new PingOptions(ttl, true);
+            var reply = await pingSender.SendPingAsync(host, 5000, new byte[32], options);
 
-                result += ttl.ToString().PadLeft(3) + " ";
+            result += $"{ttl.ToString(),3} ";
 
-                if (reply.Status == IPStatus.TtlExpired || reply.Status == IPStatus.Success)
-                {
-                    result += reply.Address.ToString().PadLeft(16) + " " + reply.RoundtripTime + "ms\n";
+            if (reply.Status is IPStatus.TtlExpired or IPStatus.Success) {
+                result += $"{reply.Address,16} {reply.RoundtripTime}ms\n";
 
-                    if (reply.Status == IPStatus.Success)
-                        break;
-                }
-                else
-                {
-                    result += "* * * * Request timed out.\n";
-                }
+                if (reply.Status == IPStatus.Success)
+                    break;
+            } else {
+                result += "* * * * Request timed out.\n";
             }
         }
         return result;
