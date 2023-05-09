@@ -38,5 +38,12 @@ public enum Command {
                "  [cron_expr] `0 0 12 ? * 2-6 *` - fire monitoring job every 12 hours from monday to friday\n" +
                "  [*] to control job you should be a chat admin"
     )]
-    Schedule
+    Schedule,
+
+    [Command("/ping",
+    Description = "The ping command sends packets of data to a specific IP address on a network",
+    Help = "`/ping help` - show this help\n" +
+            "`/ping ip_address` - start ping command\n"
+    )]
+    PingCommand,
 }
