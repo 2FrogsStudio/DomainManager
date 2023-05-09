@@ -39,6 +39,13 @@ public enum Command {
                "  [*] to control job you should be a chat admin"
     )]
     Schedule,
+    
+    [Command("/portscan",
+        Description = "Port scanner",
+        Help = "`/portscan help` - show this help\n" +
+               "`/portscan ip_address/host port` - get list of your hosts to monitor\n"
+    )]
+    PortScan,
 
     [Command("/ping",
     Description = "The ping command sends packets of data to a specific IP address on a network",
@@ -52,5 +59,5 @@ public enum Command {
     Help = "`/traceroute help` - show this help\n" +
             "`/traceroute ip_address/host` - start traceroute command\n"
     )]
-    TracerouteCommand,
+    TracerouteCommand
 }
