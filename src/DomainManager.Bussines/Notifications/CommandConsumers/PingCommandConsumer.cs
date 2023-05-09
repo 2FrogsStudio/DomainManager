@@ -20,17 +20,15 @@ public class PingCommandConsumer : CommandConsumerBase, IMediatorConsumer {
     }
 
     private static async Task<string> PingCommand(string host) {
-        Ping myPing = new Ping();
-        PingReply reply = myPing.Send(host, 5000);
+        using var ping = new Ping();
         try
         {
-            if (reply == null) return "Ping timeout";
-            return "Status :  " + reply.Status + " \n Latency : " + reply.RoundtripTime.ToString() + "ms \n Address : " + reply.Address;
+            var reply = await ping.SendPingAsync(host, 5000);
+            return $"Status :  {reply.Status:G} \n Latency : {reply.RoundtripTime}ms \n Address : {reply.Address}";
         }
         catch (PingException e)
         {
             return "Exception occurred: " + e.Message;
         }
-        
     }
 }
