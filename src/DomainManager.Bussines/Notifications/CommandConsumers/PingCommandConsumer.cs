@@ -1,7 +1,6 @@
 using DomainManager.Abstract;
 using DomainManager.Notifications.CommandConsumers.Base;
 using MassTransit.Mediator;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Telegram.Bot;
 using System.Net.NetworkInformation;
@@ -29,7 +28,7 @@ public class PingCommandConsumer : CommandConsumerBase, IMediatorConsumer {
 
     private async Task<string> PingCommand(string host, CancellationToken cancellationToken) {
         Ping myPing = new Ping();
-        PingReply reply = myPing.Send(host, 3000);
+        PingReply reply = myPing.Send(host, 5000);
         try
         {
             if (reply == null) return "Ping timeout";
