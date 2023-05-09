@@ -43,7 +43,14 @@ public enum Command {
     [Command("/ping",
     Description = "The ping command sends packets of data to a specific IP address on a network",
     Help = "`/ping help` - show this help\n" +
-            "`/ping ip_address` - start ping command\n"
+            "`/ping ip_address/host` - start ping command\n"
     )]
     PingCommand,
+
+    [Command("/traceroute",
+    Description = "Traceroute is a small shell application which shows the route and the routers a datapackage passes to reach a defined target computer.",
+    Help = "`/traceroute help` - show this help\n" +
+            "`/traceroute ip_address/host` - start traceroute command\n"
+    )]
+    TracerouteCommand,
 }
