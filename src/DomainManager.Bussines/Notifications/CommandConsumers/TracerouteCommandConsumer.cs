@@ -8,15 +8,8 @@ using System.Net.NetworkInformation;
 namespace DomainManager.Notifications.CommandConsumers;
 
 public class TracerouteCommandConsumer : CommandConsumerBase, IMediatorConsumer {
-    private readonly ApplicationDbContext _db;
-    private readonly IScopedMediator _mediator;
-
-    public TracerouteCommandConsumer(ITelegramBotClient botClient, ApplicationDbContext db, IScopedMediator mediator,
-        IMemoryCache memoryCache) :
-        base(Command.TracerouteCommand, botClient, memoryCache) {
-        _db = db;
-        _mediator = mediator;
-    }
+    public TracerouteCommandConsumer(ITelegramBotClient botClient, IMemoryCache memoryCache) :
+        base(Command.TracerouteCommand, botClient, memoryCache) { }
 
     protected override async Task<string> Consume(string[] args, Message message, long chatId, bool isAdmin,
         CancellationToken cancellationToken) {
