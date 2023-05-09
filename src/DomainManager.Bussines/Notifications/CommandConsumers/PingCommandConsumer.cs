@@ -14,7 +14,7 @@ public class PingCommandConsumer : CommandConsumerBase, IMediatorConsumer {
     protected override async Task<string> Consume(string[] args, Message message, long chatId, bool isAdmin,
         CancellationToken cancellationToken) {
         return args switch {
-            [.., { } host] => await PingCommand(host, cancellationToken),
+            [.., { } host] => await PingCommand(host),
             _ => CommandHelpers.CommandAttributeByCommand[Command.PingCommand]!.Help!
         };
     }
