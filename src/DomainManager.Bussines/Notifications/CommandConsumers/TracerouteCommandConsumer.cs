@@ -14,7 +14,7 @@ public class TracerouteCommandConsumer : CommandConsumerBase, IMediatorConsumer 
     protected override async Task<string> Consume(string[] args, Message message, long chatId, bool isAdmin,
         CancellationToken cancellationToken) {
         return args switch {
-            [.., { } host] => await TracerouteCommand(host, cancellationToken),
+            [.., { } host] => await TracerouteCommand(host),
             _ => CommandHelpers.CommandAttributeByCommand[Command.TracerouteCommand]!.Help!
         };
     }
