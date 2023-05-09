@@ -19,7 +19,7 @@ public class PingCommandConsumer : CommandConsumerBase, IMediatorConsumer {
         };
     }
 
-    private async Task<string> PingCommand(string host, CancellationToken cancellationToken) {
+    private static async Task<string> PingCommand(string host) {
         Ping myPing = new Ping();
         PingReply reply = myPing.Send(host, 5000);
         try
