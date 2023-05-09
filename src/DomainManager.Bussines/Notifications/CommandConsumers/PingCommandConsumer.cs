@@ -21,29 +21,24 @@ public class PingCommandConsumer : CommandConsumerBase, IMediatorConsumer {
 
     protected override async Task<string> Consume(string[] args, Message message, long chatId, bool isAdmin,
         CancellationToken cancellationToken) {
-        if (args.Length is 0) {
-            return await PingCommand(message, cancellationToken);
-        }
-
         return args switch {
             [.., { } host] => await PingCommand(host, cancellationToken),
             _ => CommandHelpers.CommandAttributeByCommand[Command.PingCommand]!.Help!
         };
     }
 
-    private async Task<string> PingCommand(Message message, CancellationToken cancellationToken) {
-
+    private async Task<string> PingCommand(string host, CancellationToken cancellationToken) {
         Ping myPing = new Ping();
-        PingReply reply = myPing.Send(message.Text, 1000);
-        //return monitors.Count switch {
-        //    0 => "Add your first host by `/ssl_monitor add my.site.com`.\n" +
-        //         "Or `/ssl_monitor help` to get command help.",
-
-        //    _ => "```\n" +
-        //         "Expired on   | Host\n" +
-        //         string.Join('\n', monitors) + "\n" +
-        //         "```"
-        //};
-        return "sfasd";
+        PingReply reply = myPing.Send(host, 3000);
+        try
+        {
+            if (reply == null) return "Ping timeout";
+            return "Status :  " + reply.Status + " \n Latency : " + reply.RoundtripTime.ToString() + "ms \n Address : " + reply.Address;
+        }
+        catch (PingException e)
+        {
+            return "Exception occurred: " + e.Message;
+        }
+        
     }
 }
