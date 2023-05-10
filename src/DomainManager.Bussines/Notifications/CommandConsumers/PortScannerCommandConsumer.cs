@@ -27,17 +27,15 @@ public class PortScanner : CommandConsumerBase, IMediatorConsumer {
         };
     }
 
-    private async Task<string> GetHostList(string host, string port, CancellationToken cancellationToken) {
-        TcpClient client = new TcpClient();
+    private static async Task<string> ScanPort(string host, int port, CancellationToken cancellationToken) {
+        using var client = new TcpClient();
+        bool open;
         try {
-            await client.ConnectAsync(host, int.Parse(port), cancellationToken);
-            return "Port " + port + " on host " + host + " is open";
-        }
-        catch (SocketException) {
-            return "Port " + port + " on host " + host + " is closed";
-        }
-        finally {
+            await client.ConnectAsync(host, port, cancellationToken);
+            open = true;
+        } finally {
             client.Close();
         }
+        return $"Port {port} on host {host} is {(open ? "open" : "closed")}";
     }
 }
