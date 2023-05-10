@@ -22,7 +22,7 @@ public class PortScanner : CommandConsumerBase, IMediatorConsumer {
         CancellationToken cancellationToken) {
 
         return args switch {
-            [.., { } host, { } port] when isAdmin => await GetHostList(host, port, cancellationToken),
+            [.., { } host, { } portStr] when isAdmin && int.TryParse(portStr, out var port)  => await ScanPort(host, port, cancellationToken),
             _ => CommandHelpers.CommandAttributeByCommand[Command.PortScan]!.Help!
         };
     }
