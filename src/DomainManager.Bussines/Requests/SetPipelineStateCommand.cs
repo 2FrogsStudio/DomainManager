@@ -1,3 +1,3 @@
 namespace DomainManager.Requests;
 
-public record GetPipelineStateRequest { }
+public interface GetPipelineStateRequest { }

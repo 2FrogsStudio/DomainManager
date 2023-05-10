@@ -1,3 +1,3 @@
 namespace DomainManager.Requests;
 
-public record NoPipelineStateResponse { }
+public interface NoPipelineStateResponse { }
