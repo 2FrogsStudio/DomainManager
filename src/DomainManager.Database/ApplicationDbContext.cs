@@ -8,6 +8,8 @@ public class ApplicationDbContext : DbContext {
     public DbSet<DomainMonitorByChat> DomainMonitorByChat { get; set; } = null!;
     public DbSet<SslMonitorByChat> SslMonitorByChat { get; set; } = null!;
 
+    public DbSet<PipelineState> PipelineStates { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         modelBuilder.HasCollation("case_insensitive", "en-u-ks-primary", "icu", false);
         modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);

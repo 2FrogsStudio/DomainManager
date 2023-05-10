@@ -1,4 +1,6 @@
-﻿using DomainManager.Abstract;
+﻿using System.Diagnostics;
+using DomainManager.Abstract;
+using DomainManager.Requests;
 using DomainManager.Services;
 using MassTransit;
 using MassTransit.Mediator;
@@ -36,32 +38,50 @@ public class SendCommandNotificationConsumer : IConsumer<UpdateNotification>, IM
                     MessageId: var messageId,
                     Chat.Id: var chatId
                 }
-            } || !messageText.StartsWith('/')) {
+            }) {
             return;
         }
 
-        var commandAndArgs = messageText.Split(' ');
-        var commandAndUserName = commandAndArgs[0].Split('@', 2);
-        switch (commandAndUserName.Length) {
-            case 1 when update.Message.Chat.Type is not ChatType.Private && _hostEnvironment.IsDevelopment():
-                return;
-            case 2: {
-                var botUsername = await _staticService.GetBotUsername(cancellationToken);
-                if (commandAndUserName[1] != botUsername) {
-                    _logger.LogDebug(
-                        "Command ignored die to wrong bot username Expected: {ExpectedUserName} Actual: {ActualUserName}",
-                        botUsername, commandAndUserName[1]);
+        Command command;
+        string[] args;
+        if (messageText.StartsWith('/')) {
+            var commandAndArgs = messageText.Split(' ');
+            var commandAndUserName = commandAndArgs[0].Split('@', 2);
+            switch (commandAndUserName.Length) {
+                case 1 when update.Message.Chat.Type is not ChatType.Private && _hostEnvironment.IsDevelopment():
                     return;
-                }
+                case 2: {
+                    var botUsername = await _staticService.GetBotUsername(cancellationToken);
+                    if (commandAndUserName[1] != botUsername) {
+                        _logger.LogDebug(
+                            "Command ignored die to wrong bot username Expected: {ExpectedUserName} Actual: {ActualUserName}",
+                            botUsername, commandAndUserName[1]);
+                        return;
+                    }
 
-                break;
+                    break;
+                }
+            }
+            command = CommandHelpers.CommandByText.TryGetValue(commandAndUserName[0], out var cmd)
+                ? cmd
+                : Command.Unknown;
+            args = commandAndArgs.Length >= 2 ? commandAndArgs[1..] : Array.Empty<string>();
+        } else {
+            var response = await _mediator
+                .CreateRequestClient<GetPipelineStateRequest>()
+                .GetResponse<GetPipelineStateResponse, NoPipelineStateResponse>(new { }, cancellationToken);
+            if (response.Is(out Response<NoPipelineStateResponse>? _)) {
+                await _botClient.SendTextMessageAsync(chatId, "Not in pipeline context",
+                    cancellationToken: cancellationToken);
+                return;
+            }
+            if (response.Is(out Response<GetPipelineStateResponse>? pipelineState)) {
+                command = pipelineState.Message.Command;
+                args = messageText.Split(' ');
+            } else {
+                throw new UnreachableException();
             }
         }
-
-        var command = CommandHelpers.CommandByText.TryGetValue(commandAndUserName[0], out var cmd)
-            ? cmd
-            : Command.Unknown;
-        var args = commandAndArgs.Length >= 2 ? commandAndArgs[1..] : Array.Empty<string>();
 
         if (args.Length == 0 || (args.Length == 1 && args[0].Equals("help", StringComparison.OrdinalIgnoreCase))) {
             var help = CommandHelpers.CommandAttributeByCommand[command]?.Help;

@@ -13,7 +13,7 @@ public class PingCommandConsumer : CommandConsumerBase, IMediatorConsumer {
 
     public PingCommandConsumer(ITelegramBotClient botClient, IMemoryCache memoryCache,
         ILogger<PingCommandConsumer> logger) :
-        base(Command.PingCommand, botClient, memoryCache) {
+        base(Command.Ping, botClient, memoryCache) {
         _logger = logger;
     }
 
@@ -21,7 +21,7 @@ public class PingCommandConsumer : CommandConsumerBase, IMediatorConsumer {
         CancellationToken cancellationToken) {
         return args switch {
             [{ } host] => await PingCommand(host, cancellationToken),
-            _ => CommandHelpers.CommandAttributeByCommand[Command.PingCommand]!.Help!
+            _ => CommandHelpers.CommandAttributeByCommand[Command.Ping]!.Help!
         };
     }
 

@@ -5,6 +5,9 @@ namespace DomainManager;
 public enum Command {
     Unknown,
 
+    [Command("/start", Description = "Main menu", RegisterCommand = false)]
+    Start,
+
     [Command("/help", Description = "Show this help")]
     Help,
 
@@ -14,7 +17,8 @@ public enum Command {
                "`/domain_monitor list` - get list of your domains to monitor\n" +
                "`/domain_monitor add` `domain.com` - add domain to monitoring\n" +
                "`/domain_monitor delete` `domain.com` - delete domain from monitoring\n" +
-               "  [*] to add or delete domain you should be a chat admin"
+               "  [*] to add or delete domain you should be a chat admin",
+        InlineCommand = true
     )]
     DomainMonitor,
 
@@ -24,7 +28,8 @@ public enum Command {
                "`/ssl_monitor list` - get list of your hosts to monitor\n" +
                "`/ssl_monitor add` `my.site.com` - add host to monitoring\n" +
                "`/ssl_monitor delete` `my.site.com` - delete host from monitoring\n" +
-               "  [*] to add or delete host you should be a chat admin"
+               "  [*] to add or delete host you should be a chat admin",
+        InlineCommand = true
     )]
     SslMonitor,
 
@@ -36,28 +41,33 @@ public enum Command {
                "`/schedule run` - force run updating job\n" +
                "`/schedule status` - get job status\n" +
                "  [cron_expr] `0 0 12 ? * 2-6 *` - fire monitoring job every 12 hours from monday to friday\n" +
-               "  [*] to control job you should be a chat admin"
+               "  [*] to control job you should be a chat admin",
+        InlineCommand = true
     )]
     Schedule,
-    
+
     [Command("/portscan",
         Description = "Port scanner",
         Help = "`/portscan help` - show this help\n" +
-               "`/portscan ip_address/host port` - get list of your hosts to monitor\n"
+               "`/portscan ip_address/host port` - get list of your hosts to monitor\n",
+        InlineCommand = true
     )]
     PortScan,
 
     [Command("/ping",
-    Description = "The ping command sends packets of data to a specific IP address on a network",
-    Help = "`/ping help` - show this help\n" +
-            "`/ping ip_address/host` - start ping command\n"
+        Description = "The ping command sends packets of data to a specific IP address on a network",
+        Help = "`/ping help` - show this help\n" +
+               "`/ping ip_address/host` - start ping command\n",
+        InlineCommand = true
     )]
-    PingCommand,
+    Ping,
 
     [Command("/traceroute",
-    Description = "Traceroute is a small shell application which shows the route and the routers a datapackage passes to reach a defined target computer.",
-    Help = "`/traceroute help` - show this help\n" +
-            "`/traceroute ip_address/host` - start traceroute command\n"
+        Description =
+            "Traceroute is a small shell application which shows the route and the routers a datapackage passes to reach a defined target computer.",
+        Help = "`/traceroute help` - show this help\n" +
+               "`/traceroute ip_address/host` - start traceroute command\n",
+        InlineCommand = true
     )]
-    TracerouteCommand
+    Traceroute
 }

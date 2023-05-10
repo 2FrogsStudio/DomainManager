@@ -20,7 +20,7 @@ public class BotInit : IHostedService {
 
     private async Task InitCommands(CancellationToken cancellationToken) {
         var commands = CommandHelpers.CommandAttributeByCommand.Values
-            .Where(d => d is not null)
+            .Where(d => d is not null && d.RegisterCommand)
             .Select(d => new BotCommand {
                 Command = d!.Text,
                 Description = d.Description ?? string.Empty

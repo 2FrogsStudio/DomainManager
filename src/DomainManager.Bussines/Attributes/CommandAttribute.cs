@@ -10,4 +10,7 @@ public class CommandAttribute : Attribute {
     public string? Description { get; init; }
 
     public string? Help { get; init; }
+    public bool RegisterCommand { get; init; } = true;
+
+    public bool InlineCommand { get; init; }
 }
