@@ -5,7 +5,7 @@ namespace DomainManager;
 public enum Command {
     Unknown,
 
-    [Command("/start", Description = "Main menu", RegisterCommand = false)]
+    [Command("/start", Description = "Main menu")]
     Start,
 
     [Command("/help", Description = "Show this help")]
