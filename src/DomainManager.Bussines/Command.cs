@@ -59,5 +59,5 @@ public enum Command {
     Help = "`/traceroute help` - show this help\n" +
             "`/traceroute ip_address/host` - start traceroute command\n"
     )]
-    TracerouteCommand,
+    TracerouteCommand
 }
